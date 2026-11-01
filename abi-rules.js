@@ -20,7 +20,8 @@
     { key: 'de', de: 'Deutsch', en: 'German', group: 'de', field: 'I', edupage: ['Nemecký jazyk', 'Deutsch', 'Nemecký jazyk a literatúra'] },
     { key: 'ma', de: 'Mathematik', en: 'Maths', group: 'ma', field: 'III', edupage: ['Mathematik', 'Matematika'] },
     { key: 'en', de: 'Englisch', en: 'English', group: 'fs', field: 'I', edupage: ['Anglický jazyk', 'Englisch', 'English'] },
-    { key: 'sk', de: 'Slowakisch', en: 'Slovak', group: 'fs', field: 'I', noExam: true, scale: 'sk5',
+    // Slovak has its own state Maturita; the owner decided (2026-11-01) it never counts for the DIA.
+    { key: 'sk', de: 'Slowakisch', en: 'Slovak', group: 'fs', field: 'I', noExam: true, noDia: true, scale: 'sk5',
       edupage: ['Slowakische Sprache und Literatur', 'Slovenský jazyk a literatúra', 'Slowakisch'] },
     { key: 'bi', de: 'Biologie', en: 'Biology', group: 'nw', field: 'III', edupage: ['Biologie', 'Biológia'] },
     { key: 'ph', de: 'Physik', en: 'Physics', group: 'nw', field: 'III', edupage: ['Physik', 'Fyzika'] },
@@ -117,6 +118,7 @@
     for (const k of keys) {
       const avail = per[k].length;
       let opts;
+      if (BY_KEY[k].noDia) { options[k] = [0]; per[k] = []; continue; }
       if (exam.has(k) || k === 'de' || k === 'ma') opts = avail >= 4 ? [4] : [];
       else {
         opts = [0];
