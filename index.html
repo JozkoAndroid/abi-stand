@@ -3,10 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1419" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1F5AA6">
 <meta name="color-scheme" content="light dark">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F5AA6'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='700' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Abi-Stand">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -127,7 +132,7 @@ main { padding-block: 4px 24px; padding-left: max(16px, env(safe-area-inset-left
 .seg { display: flex; gap: 6px; }
 .seg button { flex: 1 1 0; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-weight: 600; font-size: 13px; }
 .seg button.on { background: var(--dark-chip); color: var(--ink-on-dark); border-color: transparent; }
-input[type=text], input[type=number], select { min-height: 44px; border: 1.5px solid var(--line); border-radius: var(--radius-s); background: var(--surface); padding: 0 12px; width: 100%; }
+input[type=text], input[type=number], select { min-height: 44px; border: 1.5px solid var(--line); border-radius: var(--radius-s); background: var(--surface); padding: 0 12px; width: 100%; font-size: 16px; }
 input.pts { width: 68px; text-align: center; font-weight: 700; font-size: 18px; background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
 input[type=range] { width: 100%; accent-color: var(--accent); }
 .table { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, 44px) 52px; gap: 4px; align-items: center; }
@@ -872,5 +877,6 @@ boot();
 })();
 </script>
 
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}</script>
 </body>
 </html>
