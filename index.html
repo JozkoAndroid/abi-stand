@@ -216,10 +216,10 @@ const T = {
     addGrade: 'Eigene Note ergänzen (z. B. erwartete Klausur)', whatNeeded: 'Was brauche ich?', needLine: (cat, v, t) => `Für eine ${t}: nächste Note in „${cat}“ mindestens ${v}.`, needImpossible: (t) => `Eine ${t} ist mit einer weiteren Note nicht mehr erreichbar.`,
     finalGrade: 'Zeugnisnote eintragen', finalHint: 'Wenn das Zeugnis da ist. Deine Zahl gewinnt immer gegen die Hochrechnung.', expected: 'Erwartete Note', expectedHint: 'Für Halbjahre ohne Noten. Nur für die Prognose.',
     uncategorizedNote: 'Noten ohne Kategorie zählen hier nicht mit, weil der Lehrer Kategorien mit Gewichten angelegt hat.',
-    skNote: 'Slowakisch wird in EduPage mit 1–5 bewertet und nicht automatisch umgerechnet. Trag Punkte als Zeugnis- oder erwartete Note ein, wenn du es einbringen willst.',
+    skNote: 'Slowakisch zählt nie fürs DIA (eigene Maturita). Die Noten werden hier nur angezeigt, auch wenn du sie bearbeitest.',
     einSummary: '36 Halbjahresnoten', must: 'Pflicht', freeSlots: 'frei wählbar', autoHint: 'Die App füllt die freien Plätze automatisch mit deinen besten Halbjahren. Tippe ein Kästchen, um selbst zu entscheiden: zählt · zählt nicht · automatisch.',
     legendMust: 'zählt (Pflicht oder gewählt)', legendPick: 'frei · gewählt', legendOff: 'bleibt draußen', legendFix: 'von dir festgelegt', rule: 'Regel',
-    rules: { de: 'immer alle 4', ma: 'immer alle 4', en: 'Fremdsprache · 4 (eine komplett)', sk: 'Fremdsprache · optional', bi: 'NW · mind. 2 wenn genutzt', ph: 'NW · mind. 2 wenn genutzt', ge: 'GW · mind. 2', wi: 'GW · optional', et: 'GW · optional', ku: 'mind. 2', sp: 'max. 3 · optional', exam: 'Prüfungsfach · alle 4' },
+    rules: { de: 'immer alle 4', ma: 'immer alle 4', en: 'Fremdsprache · alle 4', sk: 'zählt nie (Maturita)', bi: 'NW · mind. 2 wenn genutzt', ph: 'NW · mind. 2 wenn genutzt', ge: 'GW · mind. 2', wi: 'GW · optional', et: 'GW · optional', ku: 'mind. 2', sp: 'max. 3 · optional', exam: 'Prüfungsfach · alle 4' },
     einRules: ['Sprachen + Naturwissenschaften zusammen ≥ 12', 'Jedes genutzte Fach mit ≥ 2 Halbjahren', 'Naturwissenschaften ≥ 4, Gesellschaftswissenschaften ≥ 4 (davon 2 Geschichte), Kunst ≥ 2'],
     einNoSelection: 'Mit den aktuellen Werten gibt es keine gültige Auswahl von 36 Noten. Prüfe die festgelegten Kästchen oder trag erwartete Noten ein.', assumedCells: (n) => `${n} Halbjahre ohne Note sind mit dem Fachschnitt angenommen.`,
     examTitle: 'Prüfungsfächer', examSub: 'E II · Wahl Anfang Klasse 12', eIIAssumed: 'E II angenommen', eIIEntered: 'E II', assumption: 'Annahme für offene Prüfungen', assumeAvg: 'wie mein Schnitt', assumeNotan: 'wie Notan (10)', assumeManual: 'eigene Schieber',
@@ -255,10 +255,10 @@ const T = {
     addGrade: 'Add your own grade (e.g. an expected test)', whatNeeded: 'What do I need?', needLine: (cat, v, t) => `For a ${t}: next grade in “${cat}” at least ${v}.`, needImpossible: (t) => `A ${t} is out of reach with one more grade.`,
     finalGrade: 'Enter report-card grade', finalHint: 'Once the report card is out. Your number always beats the projection.', expected: 'Expected grade', expectedHint: 'For terms without grades. Only for the forecast.',
     uncategorizedNote: 'Grades without a category are not counted here, because the teacher set up weighted categories.',
-    skNote: 'Slovak is graded 1–5 in EduPage and is not converted automatically. Enter points as a report-card or expected grade if you want to count it.',
+    skNote: 'Slovak never counts for the DIA (it has its own Maturita). Its grades are only shown here, even if you edit them.',
     einSummary: '36 term grades', must: 'mandatory', freeSlots: 'free choice', autoHint: 'The app fills the free slots with your best terms automatically. Tap a cell to decide yourself: counts · does not count · automatic.',
     legendMust: 'counts (mandatory or chosen)', legendPick: 'free · chosen', legendOff: 'stays out', legendFix: 'fixed by you', rule: 'Rule',
-    rules: { de: 'always all 4', ma: 'always all 4', en: 'language · 4 (one complete)', sk: 'language · optional', bi: 'science · min 2 if used', ph: 'science · min 2 if used', ge: 'social · min 2', wi: 'social · optional', et: 'social · optional', ku: 'min 2', sp: 'max 3 · optional', exam: 'exam subject · all 4' },
+    rules: { de: 'always all 4', ma: 'always all 4', en: 'language · all 4', sk: 'never counts (Maturita)', bi: 'science · min 2 if used', ph: 'science · min 2 if used', ge: 'social · min 2', wi: 'social · optional', et: 'social · optional', ku: 'min 2', sp: 'max 3 · optional', exam: 'exam subject · all 4' },
     einRules: ['Languages + sciences together ≥ 12', 'Every used subject with ≥ 2 terms', 'Sciences ≥ 4, social sciences ≥ 4 (2 of them History), Art ≥ 2'],
     einNoSelection: 'With the current values there is no valid selection of 36 grades. Check the fixed cells or enter expected grades.', assumedCells: (n) => `${n} terms without a grade are assumed at the subject average.`,
     examTitle: 'Exam subjects', examSub: 'E II · chosen at the start of grade 12', eIIAssumed: 'E II assumed', eIIEntered: 'E II', assumption: 'Assumption for open exams', assumeAvg: 'like my average', assumeNotan: 'like Notan (10)', assumeManual: 'my own sliders',
@@ -457,13 +457,13 @@ function compute() {
     values[k] = {};
     for (const tt of TERMS) {
       const c = cells[k + '|' + tt];
+      if (R.BY_KEY[k].noDia) { values[k][tt] = null; continue; }   // Slovak: shown, never counted
       if (c.value !== null) values[k][tt] = c.value;
-      else if (k !== 'sk' || subjAvg[k] !== null) {
+      else {
         const a = subjAvg[k] !== null ? subjAvg[k] : overall;
-        if (a !== null && k !== 'sk') { values[k][tt] = R.roundHalfUp(a); c.assumed = values[k][tt]; assumedCount++; }
-        else if (a !== null && k === 'sk') { values[k][tt] = R.roundHalfUp(a); c.assumed = values[k][tt]; assumedCount++; }
+        if (a !== null) { values[k][tt] = R.roundHalfUp(a); c.assumed = values[k][tt]; assumedCount++; }
         else values[k][tt] = null;
-      } else values[k][tt] = null;
+      }
     }
   }
   const examKeys = st.exam.map(e => e.subject).filter(Boolean);
