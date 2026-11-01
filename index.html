@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F3F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1419" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F5AA6'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='700' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Abi-Stand</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone = one column + bottom tab bar; desktop (>=900px) = left rail + content column. */
+:root {
+  --bg: #F3F5F8; --surface: #FFFFFF; --surface-2: #EEF1F5; --line: #E3E7EE;
+  --fg: #15202B; --muted: #5B6673; --faint: #9AA4AE;
+  --accent: #1F5AA6; --accent-soft: #DCE9F8; --accent-ink: #174580;
+  --good: #1E7F4F; --good-soft: #E3F1EA; --good-ink: #14583A;
+  --warn: #B9540B; --warn-soft: #FFF4E8; --warn-ink: #7A3A08;
+  --bad: #B42318; --bad-soft: #FBE9E7; --bad-ink: #7F1A12;
+  --ink-on-dark: #FFFFFF; --dark-chip: #15202B;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 18px; --radius-s: 12px; --shadow: 0 1px 2px rgba(21,32,43,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-mode="light"]) {
+    --bg: #0F1419; --surface: #1A2129; --surface-2: #232C36; --line: #2C3641;
+    --fg: #ECF0F4; --muted: #A3AEBA; --faint: #6B7784;
+    --accent: #6FA3E6; --accent-soft: #1E3350; --accent-ink: #BBD4F5;
+    --good: #49B07C; --good-soft: #163626; --good-ink: #A9E2C4;
+    --warn: #E08A3C; --warn-soft: #3A2412; --warn-ink: #F5C79A;
+    --bad: #E0645A; --bad-soft: #3D1B18; --bad-ink: #F5B5AE;
+    --ink-on-dark: #0F1419; --dark-chip: #ECF0F4;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"], :root[data-mode="dark"] {
+  --bg: #0F1419; --surface: #1A2129; --surface-2: #232C36; --line: #2C3641;
+  --fg: #ECF0F4; --muted: #A3AEBA; --faint: #6B7784;
+  --accent: #6FA3E6; --accent-soft: #1E3350; --accent-ink: #BBD4F5;
+  --good: #49B07C; --good-soft: #163626; --good-ink: #A9E2C4;
+  --warn: #E08A3C; --warn-soft: #3A2412; --warn-ink: #F5C79A;
+  --bad: #E0645A; --bad-soft: #3D1B18; --bad-ink: #F5B5AE;
+  --ink-on-dark: #0F1419; --dark-chip: #ECF0F4;
+  --shadow: none; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+* { box-sizing: border-box; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3 { margin: 0; text-wrap: balance; letter-spacing: -0.02em; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+
+#app { min-height: 100%; display: grid; grid-template-rows: auto 1fr auto; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding-block: 14px 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand h1 { font-size: 22px; font-weight: 700; }
+.brand .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 600; background: var(--surface-2); color: var(--muted); white-space: nowrap; border: 0; }
+.chip.good { background: var(--good-soft); color: var(--good-ink); }
+.chip.warn { background: var(--warn-soft); color: var(--warn-ink); }
+.chip.bad { background: var(--bad-soft); color: var(--bad-ink); }
+.chip.accent { background: var(--accent-soft); color: var(--accent-ink); }
+.chip svg { width: 13px; height: 13px; }
+
+main { padding-block: 4px 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 14px; max-width: 100%; min-width: 0; }
+.bottom { position: sticky; bottom: 0; z-index: 5; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface); border-top: 1px solid var(--line);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px)); padding-left: max(4px, env(safe-area-inset-left, 0px)); padding-right: max(4px, env(safe-area-inset-right, 0px)); }
+.bottom a, .side a { display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: var(--muted); font-size: 11px; font-weight: 600; min-height: 44px; justify-content: center; border-radius: 10px; }
+.bottom a svg, .side a svg { width: 22px; height: 22px; }
+.bottom a.on, .side a.on { color: var(--accent); }
+.side { display: none; }
+
+.card { background: var(--surface); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card.soft { background: var(--surface-2); box-shadow: none; }
+.card.warnbox { background: var(--warn-soft); color: var(--warn-ink); }
+.card h2 { font-size: 16px; font-weight: 700; }
+.card h3 { font-size: 14px; font-weight: 700; }
+.eyebrow { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.muted { color: var(--muted); } .small { font-size: 12px; } .tiny { font-size: 11px; }
+.row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.row.between { justify-content: space-between; }
+.grow { flex: 1 1 auto; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hero-num { font-size: 64px; font-weight: 700; line-height: 1; letter-spacing: -0.04em; color: var(--accent); }
+.bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; display: flex; }
+.bar > span { display: block; height: 100%; }
+.tile { background: var(--surface-2); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tile .v { font-size: 20px; font-weight: 700; }
+.badge { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 32px; padding: 0 8px; border-radius: 10px; font-weight: 700; font-size: 15px; }
+.badge.edu { background: var(--good-soft); color: var(--good-ink); }
+.badge.man { background: var(--accent-soft); color: var(--accent-ink); }
+.badge.unk { background: var(--warn-soft); color: var(--warn-ink); }
+.badge.none { background: var(--surface-2); color: var(--faint); }
+.badge.must { background: var(--dark-chip); color: var(--ink-on-dark); }
+.badge.off { background: var(--surface); color: var(--faint); border: 1px dashed var(--line); }
+.badge.sm { min-width: 30px; height: 26px; font-size: 13px; border-radius: 8px; }
+.circle { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 18px; background: var(--good-soft); color: var(--good-ink); flex: none; }
+.circle.big { width: 84px; height: 84px; font-size: 30px; }
+.circle.man { background: var(--accent-soft); color: var(--accent-ink); }
+.circle.none { background: var(--surface-2); color: var(--faint); }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.check svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.check.ok svg { color: var(--good); } .check.no svg { color: var(--bad); } .check.warn svg { color: var(--warn); }
+.list > * + * { border-top: 1px solid var(--line); }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; min-width: 0; }
+.item .t { font-size: 14px; font-weight: 600; } .item .s { font-size: 12px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: var(--radius-s); border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 600; font-size: 14px; }
+.btn.primary { background: var(--dark-chip); color: var(--ink-on-dark); border-color: transparent; }
+.btn.accent { background: var(--accent); color: #fff; border-color: transparent; }
+.btn.ghost { border-style: dashed; color: var(--accent); }
+.btn.sm { min-height: 36px; padding: 0 12px; font-size: 13px; }
+.btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: flex; gap: 6px; }
+.seg button { flex: 1 1 0; min-height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-weight: 600; font-size: 13px; }
+.seg button.on { background: var(--dark-chip); color: var(--ink-on-dark); border-color: transparent; }
+input[type=text], input[type=number], select { min-height: 44px; border: 1.5px solid var(--line); border-radius: var(--radius-s); background: var(--surface); padding: 0 12px; width: 100%; }
+input.pts { width: 68px; text-align: center; font-weight: 700; font-size: 18px; background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.table { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, 44px) 52px; gap: 4px; align-items: center; }
+.table .h { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; padding: 4px 0; }
+.table .h.l { text-align: left; }
+.trow { display: contents; }
+.trow > a, .trow > div { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.trow > a.name { justify-content: flex-start; flex-direction: column; align-items: flex-start; text-decoration: none; color: var(--fg); padding: 8px 10px; background: var(--surface); border-radius: 12px 0 0 12px; min-height: 48px; }
+.trow > div { background: var(--surface); min-height: 48px; }
+.trow > div:last-child { border-radius: 0 12px 12px 0; }
+.cellbtn { width: 38px; height: 36px; border-radius: 9px; border: 1px solid transparent; font-weight: 700; font-size: 13px; display: grid; place-items: center; padding: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 11px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--surface); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 18px 20px calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 12px; max-height: 92vh; overflow: auto; }
+.field { display: flex; flex-direction: column; gap: 4px; } .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+details { border-top: 1px solid var(--line); padding: 8px 0; } details summary { cursor: pointer; font-weight: 600; font-size: 14px; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 36px; }
+details summary::after { content: "+"; color: var(--muted); font-size: 18px; } details[open] summary::after { content: "–"; }
+details p, details li { font-size: 13px; color: var(--fg); margin: 6px 0; line-height: 1.5; } details ul { padding-left: 18px; margin: 4px 0; }
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--dark-chip); color: var(--ink-on-dark); padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 30; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+.iconbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; padding: 0; } .iconbtn svg { width: 18px; height: 18px; }
+.empty { text-align: center; padding: 28px 10px; color: var(--muted); font-size: 14px; }
+.kbd { font-size: 11px; background: var(--surface-2); padding: 2px 6px; border-radius: 6px; }
+.flagdot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); display: inline-block; }
+@media (prefers-reduced-motion: no-preference) { .btn, .cellbtn { transition: transform .08s ease; } .btn:active, .cellbtn:active { transform: scale(.97); } }
+@media (min-width: 900px) {
+  #app { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .top { grid-column: 1 / -1; padding-inline: max(28px, env(safe-area-inset-left, 0px)) max(28px, env(safe-area-inset-right, 0px)); }
+  .side { display: flex; flex-direction: column; gap: 4px; padding: 8px 16px 24px max(16px, env(safe-area-inset-left, 0px)); position: sticky; top: 64px; align-self: start; }
+  .side a { flex-direction: row; justify-content: flex-start; gap: 12px; padding: 0 14px; font-size: 14px; min-height: 44px; }
+  .side a.on { background: var(--surface); }
+  .bottom { display: none; }
+  main { max-width: 1040px; padding-inline: 16px max(28px, env(safe-area-inset-right, 0px)); padding-block: 8px 40px; }
+  .two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .hero-num { font-size: 76px; }
+  .table { grid-template-columns: minmax(0, 1fr) repeat(4, 64px) 72px; }
+  .sheet-bg { align-items: center; } .sheet { border-radius: 20px; }
+}
+</style>
+
+<div id="app">
+  <header class="top">
+    <div class="brand"><div class="logo" aria-hidden="true">A</div><h1>Abi-Stand</h1></div>
+    <div class="row">
+      <span id="syncchip" class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span id="synctext">…</span></span>
+      <button class="iconbtn" id="langbtn" aria-label="Language"><span style="font-size:12px;font-weight:700" id="langlabel">EN</span></button>
+      <button class="iconbtn" id="themebtn" aria-label="Theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"></path></svg></button>
+    </div>
+  </header>
+  <nav class="side" id="sidenav" aria-label="Menu"></nav>
+  <main id="main"></main>
+  <nav class="bottom" id="bottomnav" aria-label="Menu"></nav>
+</div>
+<div id="sheetroot"></div>
+<div id="toastroot"></div>
+
+<script src="abi-rules.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function () {
+'use strict';
+const R = window.AbiRules;
+const TERMS = R.TERMS;
+
+/* ---------- translations ---------- */
+const T = {
+  de: {
+    nav: { uebersicht: 'Übersicht', faecher: 'Fächer', einbringung: 'Einbringung', pruefung: 'Prüfung', mehr: 'Mehr' },
+    prognosis: 'Prognose Abiturnote', ofPoints: 'von 900 Punkten', ifContinues: 'wenn es so weitergeht', notPassed: 'nicht bestanden',
+    eI: 'E I · 36 Halbjahresnoten', eII: 'E II · 5 Prüfungen', projected: 'hochgerechnet', assumedOpen: 'angenommen · noch offen', entered: 'eingetragen',
+    basis: (n, m) => `Basis: ${n} von ${m} Fächern haben schon Noten.`, missingFor: (p, g) => `Für die ${g} fehlen ${p} Punkte.`, isBest: 'Besser geht es nicht.',
+    noData: 'Noch keine Noten. Sobald EduPage gelesen wurde, erscheint hier deine Prognose.',
+    checks: { no_zero: 'Keine 00 in den 36 Noten', max_7_under: 'Höchstens 7 Unterkurse', sum_180: 'Summe ≥ 180 Rohpunkte (E I ≥ 200)', three_of_five: '3 von 5 Prüfungen ≥ 05, eine aus Deutsch/Mathe/Fremdsprache', sum_25: 'Prüfungssumme ≥ 25 (E II ≥ 100)', eI_200: 'E I mindestens 200', eII_100: 'E II mindestens 100', E_300: 'Gesamt mindestens 300', exam_ok: 'Prüfungsfächer regelkonform', fields: 'Aufgabenfelder I, II, III abgedeckt' },
+    termAvg: 'Halbjahresschnitt', newGrades: 'Neu in den letzten 14 Tagen', allSubjects: 'Alle Fächer', nothingNew: 'Nichts Neues.', notDia: 'zählt nicht fürs DIA',
+    toCheck: 'Zu klären', flagCheck: 'Eintrag prüfen: Punkte oder Zählung?', flagScale: 'Wert ist keine Punktzahl 0–15', clarify: 'Klären',
+    subjects: 'Fächer', termHead: 'Fach', avgHead: 'Ø', legendEdu: 'aus EduPage (vorläufig)', legendMan: 'von dir eingetragen', legendUnk: 'unklar', legendExp: 'erwartet', legendNone: 'noch keine Note',
+    examSubject: 'Prüfungsfach', written: 'schriftlich', oral: 'mündlich', presentation: 'Präsentation', noGradeYet: 'noch keine Note', mandatory4: 'alle 4 Halbjahre zählen',
+    halfyear: 'Halbjahresnote', provisional: 'voraussichtlich', final: 'Zeugnis', weightedAvg: 'Gewichteter Schnitt', rounded: 'gerundet', edupageRounding: '(EduPage-Rundung: ab ,5 aufwärts)', worthAbi: (p) => `≈ ${p} Punkte fürs Abitur`,
+    classAvg: 'Klassenschnitt', noCategory: 'ohne Kategorie', notCounted: 'zählt nicht', ignored: 'ignoriert', edited: 'bearbeitet', manual: 'manuell',
+    addGrade: 'Eigene Note ergänzen (z. B. erwartete Klausur)', whatNeeded: 'Was brauche ich?', needLine: (cat, v, t) => `Für eine ${t}: nächste Note in „${cat}“ mindestens ${v}.`, needImpossible: (t) => `Eine ${t} ist mit einer weiteren Note nicht mehr erreichbar.`,
+    finalGrade: 'Zeugnisnote eintragen', finalHint: 'Wenn das Zeugnis da ist. Deine Zahl gewinnt immer gegen die Hochrechnung.', expected: 'Erwartete Note', expectedHint: 'Für Halbjahre ohne Noten. Nur für die Prognose.',
+    uncategorizedNote: 'Noten ohne Kategorie zählen hier nicht mit, weil der Lehrer Kategorien mit Gewichten angelegt hat.',
+    skNote: 'Slowakisch wird in EduPage mit 1–5 bewertet und nicht automatisch umgerechnet. Trag Punkte als Zeugnis- oder erwartete Note ein, wenn du es einbringen willst.',
+    einSummary: '36 Halbjahresnoten', must: 'Pflicht', freeSlots: 'frei wählbar', autoHint: 'Die App füllt die freien Plätze automatisch mit deinen besten Halbjahren. Tippe ein Kästchen, um selbst zu entscheiden: zählt · zählt nicht · automatisch.',
+    legendMust: 'zählt (Pflicht oder gewählt)', legendPick: 'frei · gewählt', legendOff: 'bleibt draußen', legendFix: 'von dir festgelegt', rule: 'Regel',
+    rules: { de: 'immer alle 4', ma: 'immer alle 4', en: 'Fremdsprache · 4 (eine komplett)', sk: 'Fremdsprache · optional', bi: 'NW · mind. 2 wenn genutzt', ph: 'NW · mind. 2 wenn genutzt', ge: 'GW · mind. 2', wi: 'GW · optional', et: 'GW · optional', ku: 'mind. 2', sp: 'max. 3 · optional', exam: 'Prüfungsfach · alle 4' },
+    einRules: ['Sprachen + Naturwissenschaften zusammen ≥ 12', 'Jedes genutzte Fach mit ≥ 2 Halbjahren', 'Naturwissenschaften ≥ 4, Gesellschaftswissenschaften ≥ 4 (davon 2 Geschichte), Kunst ≥ 2'],
+    einNoSelection: 'Mit den aktuellen Werten gibt es keine gültige Auswahl von 36 Noten. Prüfe die festgelegten Kästchen oder trag erwartete Noten ein.', assumedCells: (n) => `${n} Halbjahre ohne Note sind mit dem Fachschnitt angenommen.`,
+    examTitle: 'Prüfungsfächer', examSub: 'E II · Wahl Anfang Klasse 12', eIIAssumed: 'E II angenommen', eIIEntered: 'E II', assumption: 'Annahme für offene Prüfungen', assumeAvg: 'wie mein Schnitt', assumeNotan: 'wie Notan (10)', assumeManual: 'eigene Schieber',
+    expectedPts: 'erwartet', result: 'Ergebnis', resultHint: 'Echte Prüfungsnote eintragen, wenn du sie hast', slotRule: ['Deutsch (fest)', 'Mathematik oder Englisch', 'Mathe, Englisch, Biologie, Physik oder Geschichte', 'frei (Wirtschaft nur mündlich)', 'Präsentationsprüfung (Wirtschaft nur mündlich)'],
+    examErr: { duplicate_subject: 'Ein Fach ist doppelt gewählt.', slot1_de: 'Fach 1 muss Deutsch sein.', slot2_ma_or_en: 'Fach 2 muss Mathematik oder Englisch sein.', slot3_allowed: 'Fach 3: Mathe, Englisch, Biologie, Physik oder Geschichte.', field_I: 'Aufgabenfeld I fehlt.', field_II: 'Aufgabenfeld II fehlt (Geschichte oder Wirtschaft).', field_III: 'Aufgabenfeld III fehlt (Mathe, Biologie oder Physik).', oral_only_wi: 'Wirtschaft geht nur mündlich (Fach 4 oder 5).', no_exam_sk: 'Slowakisch ist kein DIA-Prüfungsfach.', no_exam_et: 'Ethik ist kein Prüfungsfach (noch unbestätigt).' },
+    examFoot: 'Mindestens 3 von 5 Prüfungen mit 05, davon eine aus Deutsch / Mathe / Englisch. Summe ≥ 25 Rohpunkte. 1 Punkt mehr in einer Prüfung = 4 Gesamtpunkte.', fieldLabel: 'Feld', choose: '– wählen –',
+    more: 'Mehr', syncTitle: 'EduPage-Abgleich', lastSync: 'Zuletzt', gradesRead: (n) => `${n} Noten gelesen`, neverSynced: 'noch nie gelesen', syncHow: 'Läuft automatisch auf deinem PC, 2 Minuten nachdem du dich anmeldest, höchstens einmal am Tag. Du musst nichts tun.',
+    devices: 'Gleicher Stand auf allen Geräten', devicesText: 'Die Daten liegen in deinem Claude-Konto, nicht auf dem Handy. Handy, Tablet und PC öffnen denselben Link und sehen dasselbe.',
+    language: 'Sprache', theme: 'Darstellung', themeSystem: 'System', themeLight: 'Hell', themeDark: 'Dunkel', export: 'Export', exportPdf: 'PDF-Übersicht', exportJson: 'Sicherung (JSON)', exportHint: 'Das PDF listet alle Fächer, Halbjahresnoten und die Prognose.',
+    rulesTitle: 'Die Regeln, kurz erklärt', dataStatus: 'Datenstand', offline: 'Daten nicht erreichbar. Angezeigt wird der letzte Stand auf diesem Gerät.', loading: 'Lade deine Noten …', noDb: 'Speicher nicht verfügbar. Bitte in claude.ai anmelden und die Seite neu öffnen.',
+    save: 'Speichern', cancel: 'Abbrechen', delete: 'Löschen', reset: 'Zurücksetzen', saved: 'Gespeichert', editGrade: 'Note bearbeiten', newGrade: 'Eigene Note', value: 'Wert', scale: 'Skala', scaleP15: 'Punkte 0–15', scaleG6: 'Note 1–6 (alt: 1 = 14, 2 = 11 …)', scaleIgnore: 'Ignorieren (zählt nicht)', event: 'Bezeichnung', category: 'Kategorie', term: 'Halbjahr', note: 'Notiz', none: 'keine', weight: 'Gewicht',
+    sourceEdu: 'aus EduPage', origValue: 'EduPage-Wert', editNote: 'Dein Wert gewinnt. Wenn EduPage den Eintrag ändert, siehst du beide.', subjectAvg: 'Fachschnitt', terms4: 'Die 4 Halbjahre', back: 'Zurück',
+    pdfTitle: 'Abi-Stand – Übersicht', pdfDate: 'Stand', pdfSubject: 'Fach', pdfProg: 'Prognose', pdfTotal: 'Gesamt', pdfGrade: 'Abiturnote',
+    about: 'Regelwerk: DIA · Deutsche Schule Bratislava · Abitur 2028 · Stand Sept. 2026 (+ Wirtschaft nur mündlich, Info der Schule)',
+    setupTitle: 'Einmal verbinden', setupText: 'Deine Noten liegen in einer privaten GitHub-Datei. Damit dieses Gerät sie lesen und ändern kann, brauchst du einmal deinen GitHub-Schlüssel (Token).',
+    setupStep1: 'Schlüssel erstellen (nur „gist“ anhaken, Laufzeit „No expiration“):', setupStep2: 'Den Schlüssel kopieren (beginnt mit ghp_).', setupStep3: 'Hier einfügen und auf Verbinden tippen.',
+    connect: 'Verbinden', tokenNote: 'Der Schlüssel bleibt nur in diesem Browser gespeichert.', tokenBad: 'Der Schlüssel wurde nicht angenommen. Bitte neu erstellen und wieder einfügen.', notConnected: 'nicht verbunden', ghConnected: 'Verbunden · Noten liegen in deiner privaten GitHub-Datei', disconnect: 'Trennen',
+    devicesTextGh: 'Die Daten liegen in einer privaten GitHub-Datei. Jedes Gerät, das einmal verbunden wurde, sieht denselben Stand – ohne Anmeldung auf einer Website.',
+  },
+  en: {
+    nav: { uebersicht: 'Overview', faecher: 'Subjects', einbringung: 'Counting', pruefung: 'Exams', mehr: 'More' },
+    prognosis: 'Projected Abitur grade', ofPoints: 'of 900 points', ifContinues: 'if it goes on like this', notPassed: 'not passed',
+    eI: 'E I · 36 term grades', eII: 'E II · 5 exams', projected: 'projected', assumedOpen: 'assumed · still open', entered: 'entered',
+    basis: (n, m) => `Basis: ${n} of ${m} subjects have grades so far.`, missingFor: (p, g) => `${p} points missing for a ${g}.`, isBest: 'It cannot get better than this.',
+    noData: 'No grades yet. Once EduPage has been read, your forecast appears here.',
+    checks: { no_zero: 'No 00 among the 36 grades', max_7_under: 'At most 7 below 05', sum_180: 'Sum ≥ 180 raw points (E I ≥ 200)', three_of_five: '3 of 5 exams ≥ 05, one of them German/Maths/language', sum_25: 'Exam sum ≥ 25 (E II ≥ 100)', eI_200: 'E I at least 200', eII_100: 'E II at least 100', E_300: 'Total at least 300', exam_ok: 'Exam subjects follow the rules', fields: 'Areas I, II, III covered' },
+    termAvg: 'Term average', newGrades: 'New in the last 14 days', allSubjects: 'All subjects', nothingNew: 'Nothing new.', notDia: 'not part of the DIA',
+    toCheck: 'To clarify', flagCheck: 'Check this entry: points or a count?', flagScale: 'Value is not a 0–15 score', clarify: 'Clarify',
+    subjects: 'Subjects', termHead: 'Subject', avgHead: 'Ø', legendEdu: 'from EduPage (provisional)', legendMan: 'entered by you', legendUnk: 'unclear', legendExp: 'expected', legendNone: 'no grade yet',
+    examSubject: 'Exam subject', written: 'written', oral: 'oral', presentation: 'presentation', noGradeYet: 'no grade yet', mandatory4: 'all 4 terms count',
+    halfyear: 'Term grade', provisional: 'projected', final: 'report card', weightedAvg: 'Weighted average', rounded: 'rounded', edupageRounding: '(EduPage rounding: .5 rounds up)', worthAbi: (p) => `≈ ${p} points towards the Abitur`,
+    classAvg: 'class average', noCategory: 'no category', notCounted: 'not counted', ignored: 'ignored', edited: 'edited', manual: 'manual',
+    addGrade: 'Add your own grade (e.g. an expected test)', whatNeeded: 'What do I need?', needLine: (cat, v, t) => `For a ${t}: next grade in “${cat}” at least ${v}.`, needImpossible: (t) => `A ${t} is out of reach with one more grade.`,
+    finalGrade: 'Enter report-card grade', finalHint: 'Once the report card is out. Your number always beats the projection.', expected: 'Expected grade', expectedHint: 'For terms without grades. Only for the forecast.',
+    uncategorizedNote: 'Grades without a category are not counted here, because the teacher set up weighted categories.',
+    skNote: 'Slovak is graded 1–5 in EduPage and is not converted automatically. Enter points as a report-card or expected grade if you want to count it.',
+    einSummary: '36 term grades', must: 'mandatory', freeSlots: 'free choice', autoHint: 'The app fills the free slots with your best terms automatically. Tap a cell to decide yourself: counts · does not count · automatic.',
+    legendMust: 'counts (mandatory or chosen)', legendPick: 'free · chosen', legendOff: 'stays out', legendFix: 'fixed by you', rule: 'Rule',
+    rules: { de: 'always all 4', ma: 'always all 4', en: 'language · 4 (one complete)', sk: 'language · optional', bi: 'science · min 2 if used', ph: 'science · min 2 if used', ge: 'social · min 2', wi: 'social · optional', et: 'social · optional', ku: 'min 2', sp: 'max 3 · optional', exam: 'exam subject · all 4' },
+    einRules: ['Languages + sciences together ≥ 12', 'Every used subject with ≥ 2 terms', 'Sciences ≥ 4, social sciences ≥ 4 (2 of them History), Art ≥ 2'],
+    einNoSelection: 'With the current values there is no valid selection of 36 grades. Check the fixed cells or enter expected grades.', assumedCells: (n) => `${n} terms without a grade are assumed at the subject average.`,
+    examTitle: 'Exam subjects', examSub: 'E II · chosen at the start of grade 12', eIIAssumed: 'E II assumed', eIIEntered: 'E II', assumption: 'Assumption for open exams', assumeAvg: 'like my average', assumeNotan: 'like Notan (10)', assumeManual: 'my own sliders',
+    expectedPts: 'expected', result: 'Result', resultHint: 'Enter the real exam result once you have it', slotRule: ['German (fixed)', 'Maths or English', 'Maths, English, Biology, Physics or History', 'free (Economics oral only)', 'presentation exam (Economics oral only)'],
+    examErr: { duplicate_subject: 'A subject is chosen twice.', slot1_de: 'Subject 1 must be German.', slot2_ma_or_en: 'Subject 2 must be Maths or English.', slot3_allowed: 'Subject 3: Maths, English, Biology, Physics or History.', field_I: 'Area I missing.', field_II: 'Area II missing (History or Economics).', field_III: 'Area III missing (Maths, Biology or Physics).', oral_only_wi: 'Economics is oral only (subject 4 or 5).', no_exam_sk: 'Slovak is not a DIA exam subject.', no_exam_et: 'Ethics is not an exam subject (unconfirmed).' },
+    examFoot: 'At least 3 of 5 exams with 05, one of them German / Maths / English. Sum ≥ 25 raw points. 1 more point in an exam = 4 total points.', fieldLabel: 'Area', choose: '– choose –',
+    more: 'More', syncTitle: 'EduPage sync', lastSync: 'Last', gradesRead: (n) => `${n} grades read`, neverSynced: 'never read yet', syncHow: 'Runs automatically on your PC, 2 minutes after you log on, at most once a day. Nothing for you to do.',
+    devices: 'Same state on every device', devicesText: 'The data lives in your Claude account, not on the phone. Phone, tablet and PC open the same link and see the same thing.',
+    language: 'Language', theme: 'Appearance', themeSystem: 'System', themeLight: 'Light', themeDark: 'Dark', export: 'Export', exportPdf: 'PDF overview', exportJson: 'Backup (JSON)', exportHint: 'The PDF lists every subject, term grade and the forecast.',
+    rulesTitle: 'The rules, explained briefly', dataStatus: 'Data status', offline: 'Data cannot be reached. Showing the last state saved on this device.', loading: 'Loading your grades …', noDb: 'Storage not available. Please sign in to claude.ai and open the page again.',
+    save: 'Save', cancel: 'Cancel', delete: 'Delete', reset: 'Reset', saved: 'Saved', editGrade: 'Edit grade', newGrade: 'Own grade', value: 'Value', scale: 'Scale', scaleP15: 'Points 0–15', scaleG6: 'Grade 1–6 (old: 1 = 14, 2 = 11 …)', scaleIgnore: 'Ignore (does not count)', event: 'Name', category: 'Category', term: 'Term', note: 'Note', none: 'none', weight: 'Weight',
+    sourceEdu: 'from EduPage', origValue: 'EduPage value', editNote: 'Your value wins. If EduPage changes the entry, you will see both.', subjectAvg: 'Subject average', terms4: 'The 4 terms', back: 'Back',
+    pdfTitle: 'Abi-Stand – Overview', pdfDate: 'As of', pdfSubject: 'Subject', pdfProg: 'Forecast', pdfTotal: 'Total', pdfGrade: 'Abitur grade',
+    about: 'Rules: DIA · German School Bratislava · Abitur 2028 · as of Sept 2026 (+ Economics oral only, told by the school)',
+    setupTitle: 'Connect once', setupText: 'Your grades live in a private GitHub file. So that this device can read and change them, it needs your GitHub key (token) once.',
+    setupStep1: 'Create the key (tick only “gist”, expiration “No expiration”):', setupStep2: 'Copy the key (it starts with ghp_).', setupStep3: 'Paste it here and tap Connect.',
+    connect: 'Connect', tokenNote: 'The key is stored only in this browser.', tokenBad: 'The key was not accepted. Please create a new one and paste it again.', notConnected: 'not connected', ghConnected: 'Connected · grades live in your private GitHub file', disconnect: 'Disconnect',
+    devicesTextGh: 'The data lives in a private GitHub file. Every device that was connected once sees the same state, with no website login.',
+  }
+};
+const RULES_TEXT = {
+  de: [
+    ['Punkte statt Noten', 'Ab Klasse 11 gibt es 0 bis 15 Punkte. 15/14/13 = sehr gut, 12/11/10 = gut, 09/08/07 = befriedigend, 06/05/04 = ausreichend, 03/02/01 = mangelhaft, 00 = ungenügend. Ab 05 ist bestanden. 04 und weniger ist ein „Unterkurs“. 00 heißt: Leistung nicht erbracht.'],
+    ['Die Halbjahresnote', 'Jedes Halbjahr bekommst du pro Fach eine Note. Sie besteht zu 50 % aus Klausuren und zu 50 % aus sonstiger Mitarbeit (SoMi). Die App rechnet das mit den Gewichten, die dein Lehrer in EduPage eingestellt hat, und rundet wie EduPage (ab ,5 aufwärts). Die echte Zeugnisnote kannst du eintragen, dann gilt sie.'],
+    ['E I: die 36 Halbjahresnoten', 'Aus den 4 Halbjahren von Klasse 11 und 12 zählen 36 Noten. Pflicht: Deutsch 4, Mathe 4, eine Fremdsprache 4, Naturwissenschaften 4, Gesellschaftswissenschaften 4 (davon 2 Geschichte), Kunst 2, jedes Prüfungsfach 4, Sport höchstens 3. Den Rest wählst du frei, immer mindestens 2 Halbjahre eines Fachs. Summe der 36 Noten × 10/9 = E I (max. 600, mind. 200).'],
+    ['E II: die 5 Prüfungen', '3 schriftliche + 2 mündliche Prüfungen, Deutsch ist immer Fach 1. Fach 2: Mathe oder Englisch. Fach 3: Mathe, Englisch, Bio, Physik oder Geschichte. Fach 4 und 5 frei, aber alle drei Aufgabenfelder müssen vorkommen. Wirtschaft geht nur mündlich. Jede Prüfung zählt × 4, also bis 60 Punkte (max. 300, mind. 100).'],
+    ['Die Abiturnote', 'E = E I + E II, maximal 900. 823 Punkte = 1,0. Jede Zehntelnote sind 18 Punkte. 643 = 2,0, 463 = 3,0, 300 = 4,0. Unter 300: nicht bestanden. Ein schwacher Bereich kann nicht durch den anderen ausgeglichen werden.'],
+    ['Bedingungen', 'Unter den 36 Noten darf keine 00 sein und höchstens 7 unter 05. In den Prüfungen müssen mindestens 3 von 5 Fächern 05 haben, eines davon Deutsch, Mathe oder Fremdsprache. Hat ein Prüfungsfach in einem Halbjahr 00, gibt es keine Zulassung.'],
+    ['Was die Prognose macht', 'Für Halbjahre ohne Noten nimmt die App deinen bisherigen Schnitt im Fach an (oder, wenn das Fach noch leer ist, deinen Gesamtschnitt). Für offene Prüfungen nimmt sie das, was du unter Prüfung einstellst. Notan nimmt dagegen einfach 10 Punkte pro Prüfung und rechnet ohne Einbringungsregeln.'],
+  ],
+  en: [
+    ['Points instead of grades', 'From grade 11 you get 0 to 15 points. 15/14/13 = very good, 12/11/10 = good, 09/08/07 = satisfactory, 06/05/04 = sufficient, 03/02/01 = poor, 00 = fail. 05 and up is a pass. 04 and below is an “Unterkurs”. 00 means the work counts as not done.'],
+    ['The term grade', 'Every term you get one grade per subject. It is 50 % class tests and 50 % other work (SoMi). The app uses the weights your teacher set in EduPage and rounds like EduPage (.5 rounds up). You can enter the real report-card grade; then it wins.'],
+    ['E I: the 36 term grades', 'Out of the 4 terms of grades 11 and 12, 36 grades count. Mandatory: German 4, Maths 4, one foreign language 4, sciences 4, social sciences 4 (2 of them History), Art 2, every exam subject 4, Sport at most 3. The rest you choose, always at least 2 terms of a subject. Sum of the 36 grades × 10/9 = E I (max 600, min 200).'],
+    ['E II: the 5 exams', '3 written + 2 oral exams, German is always subject 1. Subject 2: Maths or English. Subject 3: Maths, English, Biology, Physics or History. Subjects 4 and 5 are free, but all three areas must appear. Economics is oral only. Each exam counts × 4, so up to 60 points (max 300, min 100).'],
+    ['The Abitur grade', 'E = E I + E II, at most 900. 823 points = 1.0. Each tenth of a grade is 18 points. 643 = 2.0, 463 = 3.0, 300 = 4.0. Below 300: not passed. A weak part cannot be balanced by the other.'],
+    ['Conditions', 'Among the 36 grades there must be no 00 and at most 7 below 05. In the exams at least 3 of 5 subjects need 05, one of them German, Maths or a foreign language. A 00 in an exam subject in any term means no admission.'],
+    ['What the forecast does', 'For terms without grades the app assumes your average in that subject so far (or your overall average if the subject is still empty). For open exams it takes what you set under Exams. Notan instead simply assumes 10 points per exam and ignores the counting rules.'],
+  ]
+};
+
+/* ---------- state ---------- */
+const DEFAULT_SETTINGS = {
+  exam: [{ subject: 'de', mode: 'written', result: null }, { subject: 'en', mode: 'written', result: null }, { subject: 'ph', mode: 'written', result: null }, { subject: 'wi', mode: 'oral', result: null }, { subject: 'bi', mode: 'oral', result: null }],
+  eII: { mode: 'avg', manual: {} }, fixed: {},
+};
+const S = {
+  lang: 'de', mode: 'system', view: 'uebersicht', subject: null, term: null,
+  docs: { grades: null, edits: null, manual: null, terms: null, settings: null },
+  store: null, writing: false, downloads: null, status: 'loading',
+};
+const ICONS = {
+  uebersicht: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12 12 3l9 9"></path><path d="M5 10v10h14V10"></path></svg>',
+  faecher: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>',
+  einbringung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>',
+  pruefung: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M8.5 14 7 22l5-3 5 3-1.5-8"></path></svg>',
+  mehr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"></path><path d="M12 17h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>',
+  no: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="width:16px;height:16px"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>',
+};
+const t = () => T[S.lang];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sName = k => (R.BY_KEY[k] ? R.BY_KEY[k][S.lang] : k);
+const fmt1 = x => (x === null || x === undefined || isNaN(x)) ? '–' : (Math.round(x * 10) / 10).toFixed(1).replace('.', S.lang === 'de' ? ',' : '.');
+const fmtG = g => g === null ? t().notPassed : g.toFixed(1).replace('.', S.lang === 'de' ? ',' : '.');
+const pad2 = n => (n < 10 ? '0' : '') + n;
+const fmtDate = iso => { if (!iso) return '–'; const d = new Date(iso); if (isNaN(d)) return iso; return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; };
+const fmtDateTime = iso => { if (!iso) return '–'; const d = new Date(iso); if (isNaN(d)) return iso; return `${fmtDate(iso)} ${d.getHours()}:${pad2(d.getMinutes())}`; };
+const settings = () => Object.assign({}, DEFAULT_SETTINGS, S.docs.settings || {});
+const edits = () => (S.docs.edits && S.docs.edits.edits) || {};
+const manual = () => (S.docs.manual && S.docs.manual.grades) || [];
+const terms = () => Object.assign({ final: {}, expected: {} }, S.docs.terms || {});
+
+/* ---------- persistence ---------- */
+function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
+let writeQueue = Promise.resolve();
+function writeDoc(name, data) {
+  S.docs[name] = data; lsSet('abi.' + name, data); render();
+  if (!S.store) return Promise.resolve();
+  S.writing = true;
+  writeQueue = writeQueue.then(() => S.store.save(name, data)).then(() => toast(t().saved)).catch(e => { console.error(e); toast((e && e.message) || 'Fehler'); }).then(() => { S.writing = false; });
+  return writeQueue;
+}
+const DOC_NAMES = ['grades', 'edits', 'manual', 'terms', 'settings'];
+/* Storage A: the Claude artifact database (when the page runs inside claude.ai). */
+function claudeStore(db) {
+  return {
+    kind: 'claude',
+    save: (name, data) => db.doc('meta/' + name).set(data),
+    subscribe(onDoc, onError, onReady) {
+      let pending = DOC_NAMES.length;
+      for (const n of DOC_NAMES) db.doc('meta/' + n).onSnapshot(snap => {
+        if (!snap.metadata.hasPendingWrites) onDoc(n, snap.exists ? snap.data() : null);
+        if (!snap.metadata.fromCache && pending > 0) { pending--; if (pending === 0) onReady(); }
+      }, onError);
+    }
+  };
+}
+/* Storage B: a secret GitHub gist (when the page is hosted on GitHub Pages or opened anywhere else).
+   One gist named "abi-stand-data" holds one JSON file per document. The PC script writes grades.json
+   into the same gist. The token is kept only in this browser. */
+function gistStore(token) {
+  let gistId = lsGet('abi.gistId') || null, lastUpdated = null;
+  async function api(path, opts) {
+    const r = await fetch('https://api.github.com' + path, Object.assign({}, opts, { headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' } }));
+    if (r.status === 401) { const e = new Error('token'); e.code = 'token'; throw e; }
+    if (!r.ok) throw new Error('GitHub ' + r.status);
+    return r.status === 204 ? null : r.json();
+  }
+  async function find() {
+    if (gistId) return gistId;
+    const gists = await api('/gists?per_page=100');
+    const g = gists.find(x => x.description === 'abi-stand-data');
+    if (g) gistId = g.id;
+    else { const c = await api('/gists', { method: 'POST', body: JSON.stringify({ description: 'abi-stand-data', public: false, files: { 'abi-stand.json': { content: '{"app":"abi-stand"}' } } }) }); gistId = c.id; }
+    lsSet('abi.gistId', gistId); return gistId;
+  }
+  async function load(force) {
+    const id = await find();
+    const g = await api('/gists/' + id + '?t=' + Date.now());
+    if (!force && lastUpdated && g.updated_at === lastUpdated) return null;
+    lastUpdated = g.updated_at;
+    const out = {};
+    for (const n of DOC_NAMES) { const f = g.files[n + '.json']; if (!f) { out[n] = null; continue; } const txt = f.truncated ? await (await fetch(f.raw_url)).text() : f.content; try { out[n] = JSON.parse(txt); } catch (e) { out[n] = null; } }
+    return out;
+  }
+  return {
+    kind: 'gist', load,
+    async save(name, data) { const id = await find(); const g = await api('/gists/' + id, { method: 'PATCH', body: JSON.stringify({ files: { [name + '.json']: { content: JSON.stringify(data) } } }) }); lastUpdated = g.updated_at; },
+    subscribe(onDoc, onError, onReady) {
+      let first = true;
+      const poll = async (force) => {
+        if (S.writing || document.querySelector('.sheet')) return;
+        try { const docs = await load(force); if (docs) for (const n of DOC_NAMES) onDoc(n, docs[n]); if (first) { first = false; onReady(); } }
+        catch (e) { onError(e); }
+      };
+      poll(true);
+      setInterval(() => { if (document.visibilityState === 'visible') poll(false); }, 60000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') poll(false); });
+      window.addEventListener('focus', () => poll(false));
+    }
+  };
+}
+async function saveFile(filename, data) {
+  if (S.downloads) { try { await S.downloads.save({ filename, data }); } catch (e) { if (e && e.code !== 'declined') toast(e.message || 'Fehler'); } return; }
+  const blob = data instanceof Blob ? data : new Blob([data], { type: filename.endsWith('.pdf') ? 'application/pdf' : 'application/json' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function toast(msg) { const r = document.getElementById('toastroot'); r.innerHTML = `<div class="toast">${esc(msg)}</div>`; clearTimeout(toast.tm); toast.tm = setTimeout(() => { r.innerHTML = ''; }, 1800); }
+
+/* ---------- computation ---------- */
+function effectiveGrades() {
+  const ed = edits();
+  const imported = ((S.docs.grades && S.docs.grades.grades) || []).map(g => {
+    const e = ed[g.id] || {};
+    const scale = e.scale || g.scale || 'p15';
+    const value = e.value !== undefined && e.value !== null && e.value !== '' ? e.value : g.value;
+    const ignored = !!e.ignore || scale === 'ignore';
+    const points = ignored ? null : R.pointsOf(value, scale);
+    return Object.assign({}, g, { value, scale, ignored, points, edited: !!(e.value || e.scale || e.ignore), note: e.note || '', origValue: g.value, flag: e.value || e.scale || e.ignore ? null : g.flag });
+  });
+  const man = manual().map(g => Object.assign({}, g, { points: g.ignore ? null : R.pointsOf(g.value, g.scale || 'p15'), ignored: !!g.ignore, isManual: true, source: 'manual' }));
+  return imported.concat(man);
+}
+function compute() {
+  const grades = effectiveGrades();
+  const tm = terms(); const st = settings();
+  const cells = {};
+  const keys = R.SUBJECTS.map(s => s.key);
+  for (const k of keys) for (const term of TERMS) {
+    const list = grades.filter(g => g.subject === k && g.term === term);
+    const est = R.estimateTerm(list.map(g => ({ points: g.points, evWeight: g.evWeight, category: g.category, catWeight: g.catWeight })));
+    const key = k + '|' + term;
+    const fin = typeof tm.final[key] === 'number' ? tm.final[key] : null;
+    const exp = typeof tm.expected[key] === 'number' ? tm.expected[key] : null;
+    let value = null, kind = null;
+    if (fin !== null) { value = fin; kind = 'final'; }
+    else if (est) { value = est.points; kind = 'est'; }
+    else if (exp !== null) { value = exp; kind = 'expected'; }
+    cells[key] = { subject: k, term, grades: list, est, final: fin, expected: exp, value, kind, flags: list.filter(g => g.flag).length };
+  }
+  const subjAvg = {}; const subjKnown = {};
+  for (const k of keys) {
+    const vals = TERMS.map(tt => cells[k + '|' + tt]).filter(c => c.value !== null).map(c => c.value);
+    subjKnown[k] = vals.length; subjAvg[k] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }
+  const allVals = keys.filter(k => k !== 'sk').flatMap(k => TERMS.map(tt => cells[k + '|' + tt].value)).filter(v => v !== null);
+  const overall = allVals.length ? allVals.reduce((a, b) => a + b, 0) / allVals.length : null;
+  // values for the Einbringung: known cells, else assumed
+  const values = {}; let assumedCount = 0;
+  for (const k of keys) {
+    values[k] = {};
+    for (const tt of TERMS) {
+      const c = cells[k + '|' + tt];
+      if (c.value !== null) values[k][tt] = c.value;
+      else if (k !== 'sk' || subjAvg[k] !== null) {
+        const a = subjAvg[k] !== null ? subjAvg[k] : overall;
+        if (a !== null && k !== 'sk') { values[k][tt] = R.roundHalfUp(a); c.assumed = values[k][tt]; assumedCount++; }
+        else if (a !== null && k === 'sk') { values[k][tt] = R.roundHalfUp(a); c.assumed = values[k][tt]; assumedCount++; }
+        else values[k][tt] = null;
+      } else values[k][tt] = null;
+    }
+  }
+  const examKeys = st.exam.map(e => e.subject).filter(Boolean);
+  const ein = overall === null ? { error: 'no_data' } : R.einbringung(values, examKeys, st.fixed);
+  const examValid = R.examSlotsValid(st.exam);
+  const avgOf = k => subjAvg[k] !== null ? subjAvg[k] : overall;
+  const e2 = R.eII(st.exam, st.eII, avgOf);
+  const tot = (!ein.error && e2.complete) ? R.total(ein.eI, e2.eII) : null;
+  const termAvg = {};
+  for (const tt of TERMS) { const v = keys.filter(k => k !== 'sk').map(k => cells[k + '|' + tt]).filter(c => c.value !== null && c.kind !== 'expected').map(c => c.value); termAvg[tt] = v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }
+  const subjectsWithData = keys.filter(k => k !== 'sk' && subjKnown[k] > 0).length;
+  return { grades, cells, subjAvg, subjKnown, overall, values, assumedCount, ein, examValid, e2, tot, termAvg, subjectsWithData, totalSubjects: keys.length - 1 };
+}
+function latestTermWithData(C, k) { for (let i = TERMS.length - 1; i >= 0; i--) if (C.cells[k + '|' + TERMS[i]].grades.length) return TERMS[i]; return '11.I'; }
+function neededFor(list, category, catWeight, target) {
+  for (let v = 0; v <= 15; v++) {
+    const est = R.estimateTerm(list.concat([{ points: v, evWeight: 20, category, catWeight }]));
+    if (est && est.points >= target) return v;
+  }
+  return null;
+}
+
+/* ---------- rendering ---------- */
+function navHtml(cls) {
+  return Object.keys(t().nav).map(v => `<a href="#${v}" class="${S.view === v || (S.view === 'fach' && v === 'faecher') ? 'on' : ''}" data-nav="${v}">${ICONS[v]}<span>${esc(t().nav[v])}</span></a>`).join('');
+}
+function checkRow(ok, label, extra) { const cls = ok === true ? 'ok' : ok === false ? 'no' : 'warn'; return `<div class="check ${cls}">${ICONS[ok === true ? 'ok' : ok === false ? 'no' : 'warn']}<span>${esc(label)}${extra ? ` <span class="muted">(${esc(extra)})</span>` : ''}</span></div>`; }
+function badgeFor(c) {
+  if (!c || c.value === null) return `<span class="badge none">–</span>`;
+  const cls = c.kind === 'final' ? 'man' : c.kind === 'expected' ? 'man' : c.flags ? 'unk' : 'edu';
+  return `<span class="badge ${cls}" title="${c.kind}">${c.value}</span>`;
+}
+function render() {
+  document.getElementById('sidenav').innerHTML = navHtml();
+  document.getElementById('bottomnav').innerHTML = navHtml();
+  document.getElementById('langlabel').textContent = S.lang === 'de' ? 'EN' : 'DE';
+  const C = compute();
+  renderSync(C);
+  const main = document.getElementById('main');
+  const views = { uebersicht: vOverview, faecher: vSubjects, fach: vSubject, einbringung: vEinbringung, pruefung: vExams, mehr: vMore };
+  main.innerHTML = (S.status === 'token' && !S.docs.grades ? vSetup() : (S.status === 'token' ? vSetup(true) : '')) + (views[S.view] || vOverview)(C);
+  window.scrollTo({ top: 0 });
+}
+function renderSync(C) {
+  const chip = document.getElementById('syncchip'); const txt = document.getElementById('synctext');
+  const g = S.docs.grades;
+  if (S.status === 'loading') { chip.className = 'chip'; txt.textContent = t().loading; return; }
+  if (S.status === 'token') { chip.className = 'chip warn'; txt.textContent = t().notConnected; return; }
+  if (S.status === 'nodb' && !g) { chip.className = 'chip bad'; txt.textContent = t().noDb; return; }
+  if (!g) { chip.className = 'chip warn'; txt.textContent = 'EduPage · ' + t().neverSynced; return; }
+  const age = (Date.now() - new Date(g.syncedAt).getTime()) / 864e5;
+  chip.className = 'chip ' + (S.status === 'offline' ? 'warn' : age > 8 ? 'warn' : 'good');
+  txt.textContent = 'EduPage · ' + fmtDateTime(g.syncedAt);
+}
+
+function vOverview(C) {
+  const tr = t();
+  const hasData = C.overall !== null;
+  const tot = C.tot;
+  let hero;
+  if (!hasData) hero = `<div class="card"><div class="eyebrow">${esc(tr.prognosis)}</div><div class="empty">${esc(tr.noData)}</div></div>`;
+  else {
+    const eIv = C.ein.error ? null : C.ein.eI; const eIIv = C.e2.eII;
+    const E = tot ? tot.E : null;
+    const pctI = eIv ? eIv / 900 * 100 : 0, pctII = eIIv ? eIIv / 900 * 100 : 0;
+    const missing = tot && tot.next ? tr.missingFor(tot.missingForNext, fmtG(tot.next)) : (tot && tot.grade === 1.0 ? tr.isBest : '');
+    hero = `<div class="card">
+      <div class="eyebrow">${esc(tr.prognosis)}</div>
+      <div class="row" style="align-items:flex-end;gap:14px"><div class="hero-num num">${tot ? esc(fmtG(tot.grade)) : '–'}</div>
+        <div class="small muted" style="padding-bottom:8px">≈ ${E ?? '–'} ${esc(tr.ofPoints)}<br>${esc(tr.ifContinues)}</div></div>
+      <div class="bar"><span style="width:${pctI}%;background:var(--good)"></span><span style="width:${pctII}%;background:var(--accent)"></span></div>
+      <div class="grid2">
+        <div class="tile"><div class="small muted" style="font-weight:600">${esc(tr.eI)}</div><div class="v num">${eIv ?? '–'} <span class="small muted" style="font-weight:500">/ 600</span></div><div class="tiny" style="color:var(--good);font-weight:600">${esc(tr.projected)}${C.assumedCount ? ' · ' + C.assumedCount + ' ' + (S.lang === 'de' ? 'angenommen' : 'assumed') : ''}</div></div>
+        <div class="tile"><div class="small muted" style="font-weight:600">${esc(tr.eII)}</div><div class="v num">${eIIv} <span class="small muted" style="font-weight:500">/ 300</span></div><div class="tiny" style="color:var(--accent);font-weight:600">${esc(C.e2.rows.every(r => !r.assumed) ? tr.entered : tr.assumedOpen)}</div></div>
+      </div>
+      <div class="small muted">${esc(tr.basis(C.subjectsWithData, C.totalSubjects))} ${esc(missing)}</div>
+      ${C.ein.error && C.ein.error !== 'no_data' ? `<div class="small" style="color:var(--warn)">${esc(tr.einNoSelection)}</div>` : ''}
+    </div>`;
+  }
+  const checks = [];
+  if (!C.ein.error) for (const c of C.ein.checks) checks.push(checkRow(c.ok, tr.checks[c.id], String(c.value)));
+  checks.push(checkRow(C.examValid.ok, tr.checks.exam_ok));
+  if (tot) for (const c of tot.checks) checks.push(checkRow(c.ok, tr.checks[c.id], String(c.value)));
+  const termTiles = TERMS.map(tt => `<div class="tile" style="align-items:center;text-align:center"><div class="circle ${C.termAvg[tt] === null ? 'none' : ''}" style="width:50px;height:50px;font-size:16px">${esc(fmt1(C.termAvg[tt]))}</div><div class="tiny muted" style="font-weight:600">${tt}</div></div>`).join('');
+  const cutoff = Date.now() - 14 * 864e5;
+  const recent = C.grades.filter(g => g.date && new Date(g.date).getTime() >= cutoff).sort((a, b) => (b.date > a.date ? 1 : -1)).slice(0, 8);
+  const recentHtml = recent.length ? recent.map(g => `<div class="item"><div class="grow"><div class="t">${esc(sName(g.subject))}${g.subject === 'sk' ? ` <span class="tiny muted">· ${esc(tr.notDia)}</span>` : ''}</div><div class="s">${esc(g.event || '')} · ${esc(fmtDate(g.date))}${g.category ? ' · ' + esc(g.category) : ''}</div></div><span class="badge ${g.points === null ? 'none' : g.isManual || g.edited ? 'man' : g.flag ? 'unk' : 'edu'}">${esc(g.value)}</span></div>`).join('') : `<div class="muted small">${esc(tr.nothingNew)}</div>`;
+  const flagged = C.grades.filter(g => g.flag && !g.ignored);
+  const flagHtml = flagged.length ? `<div class="card warnbox">${flagged.map(g => `<div class="row between"><div class="small"><strong>${esc(sName(g.subject))} ${g.term}: „${esc(g.value)}“ (${esc(g.event)})</strong><br>${esc(g.flag === 'scale' ? tr.flagScale : tr.flagCheck)}</div><button class="btn sm" data-edit="${esc(g.id)}" style="color:var(--warn-ink);border-color:var(--warn)">${esc(tr.clarify)}</button></div>`).join('')}</div>` : '';
+  return `<div class="two"><div class="stack" style="gap:14px">${hero}
+      <div class="card"><div class="grid4">${termTiles}</div><div class="tiny muted">${esc(tr.termAvg)}</div></div>
+      ${flagHtml}</div>
+    <div class="stack" style="gap:14px">
+      <div class="card"><div class="stack">${checks.join('')}</div></div>
+      <div class="card"><div class="row between"><h2>${esc(tr.newGrades)}</h2><a href="#faecher" class="small" style="font-weight:600;text-decoration:none">${esc(tr.allSubjects)}</a></div><div class="list">${recentHtml}</div></div>
+    </div></div>`;
+}
+
+function vSubjects(C) {
+  const tr = t(); const st = settings(); const examKeys = st.exam.map(e => e.subject);
+  const rows = R.SUBJECTS.map(s => {
+    const k = s.key; const exIdx = examKeys.indexOf(k);
+    const hint = exIdx >= 0 ? `${tr.examSubject} ${exIdx + 1} · ${exIdx < 3 ? tr.written : exIdx === 4 ? tr.presentation : tr.oral}` : (k === 'sk' ? tr.notDia : (k === 'ma' || k === 'de') ? tr.mandatory4 : '');
+    const avg = C.subjAvg[k];
+    return `<div class="trow"><a class="name" href="#faecher" data-subject="${k}"><span style="font-weight:600;font-size:14px">${esc(sName(k))}</span><span class="tiny muted">${esc(hint || (C.subjKnown[k] ? '' : tr.noGradeYet))}</span></a>
+      ${TERMS.map(tt => `<div>${badgeFor(C.cells[k + '|' + tt])}</div>`).join('')}
+      <div><span class="circle ${avg === null ? 'none' : ''}" style="width:40px;height:40px;font-size:13px">${esc(fmt1(avg))}</span></div></div>`;
+  }).join('');
+  return `<div class="row between"><h2 style="font-size:22px">${esc(tr.subjects)}</h2><span class="small muted" style="font-weight:600">${S.lang === 'de' ? 'Klasse 11 · 2026/27' : 'Grade 11 · 2026/27'}</span></div>
+    <div class="table"><div class="h l">${esc(tr.termHead)}</div>${TERMS.map(tt => `<div class="h">${tt}</div>`).join('')}<div class="h">${esc(tr.avgHead)}</div>${rows}</div>
+    <div class="legend"><span><i style="background:var(--good-soft);border:1px solid var(--good)"></i>${esc(tr.legendEdu)}</span><span><i style="background:var(--accent-soft);border:1px solid var(--accent)"></i>${esc(tr.legendMan)} / ${esc(tr.legendExp)}</span><span><i style="background:var(--warn-soft);border:1px solid var(--warn)"></i>${esc(tr.legendUnk)}</span><span><i style="background:var(--surface-2)"></i>${esc(tr.legendNone)}</span></div>`;
+}
+
+function vSubject(C) {
+  const tr = t(); const k = S.subject || 'ma'; const s = R.BY_KEY[k];
+  if (!S.term) S.term = latestTermWithData(C, k);
+  const term = S.term; const c = C.cells[k + '|' + term];
+  const tmv = terms();
+  const est = c.est;
+  const cats = {};
+  for (const g of c.grades) { const name = g.category || ''; (cats[name] = cats[name] || { name, weight: g.catWeight, grades: [] }).grades.push(g); }
+  const hasCats = Object.keys(cats).some(n => n);
+  const catOrder = Object.values(cats).sort((a, b) => (b.weight || 0) - (a.weight || 0) || (a.name ? -1 : 1));
+  const gradeRow = g => `<button class="item" data-edit="${esc(g.id)}" style="width:100%;background:none;border:0;text-align:left;padding:9px 0">
+      <div class="grow"><div class="t">${esc(g.event || (g.isManual ? tr.manual : ''))}${g.isManual ? ` <span class="chip accent" style="padding:2px 7px;font-size:10px">${esc(tr.manual)}</span>` : ''}${g.edited ? ` <span class="chip accent" style="padding:2px 7px;font-size:10px">${esc(tr.edited)}</span>` : ''}${g.flag && !g.ignored ? ' <span class="flagdot"></span>' : ''}</div>
+        <div class="s">${esc(fmtDate(g.date))}${g.classAvg ? ` · ${esc(tr.classAvg)} ${esc(String(g.classAvg).replace('.', S.lang === 'de' ? ',' : '.'))}` : ''}${g.ignored ? ` · ${esc(tr.ignored)}` : ''}${hasCats && !g.category ? ` · ${esc(tr.noCategory)} · ${esc(tr.notCounted)}` : ''}${g.note ? ' · ' + esc(g.note) : ''}</div></div>
+      <span class="badge ${g.ignored || g.points === null ? 'none' : g.isManual || g.edited ? 'man' : g.flag ? 'unk' : 'edu'}">${esc(g.value)}</span></button>`;
+  const catHtml = catOrder.map(cat => `<div class="row between" style="padding-top:6px"><div style="font-weight:700;font-size:14px">${esc(cat.name || tr.noCategory)} <span class="muted" style="font-weight:600">${cat.weight ? '· ' + cat.weight + ' %' : ''}</span></div>
+      <div style="font-weight:700" class="num">${esc(fmt1(est && est.categories.find(x => x.name === cat.name) ? est.categories.find(x => x.name === cat.name).avg : (cat.name ? null : (R.estimateTerm(cat.grades.map(g => ({ points: g.points, evWeight: g.evWeight, category: null }))) || {}).avg)))}</div></div>
+      <div class="list">${cat.grades.map(gradeRow).join('')}</div>`).join('');
+  let need = '';
+  if (est && est.points < 15) {
+    const targets = [est.points + 1, Math.min(15, est.points + 2)].filter((v, i, a) => a.indexOf(v) === i);
+    const cat = catOrder.find(x => x.name && /klausur|schriftlich|test|KA/i.test(x.name)) || catOrder[0];
+    const lines = targets.map(tg => { const v = neededFor(c.grades.filter(g => !g.ignored).map(g => ({ points: g.points, evWeight: g.evWeight, category: g.category, catWeight: g.catWeight })), cat && cat.name ? cat.name : null, cat ? cat.weight : null, tg); return v === null ? tr.needImpossible(tg) : tr.needLine(cat && cat.name ? cat.name : (S.lang === 'de' ? 'nächste Note' : 'next grade'), v, tg); });
+    need = `<div class="card"><h3>${esc(tr.whatNeeded)}</h3>${lines.map(l => `<div class="small">${esc(l)}</div>`).join('')}</div>`;
+  }
+  const finKey = k + '|' + term;
+  const finVal = typeof tmv.final[finKey] === 'number' ? tmv.final[finKey] : '';
+  const expVal = typeof tmv.expected[finKey] === 'number' ? tmv.expected[finKey] : '';
+  const summary = `<div class="card"><div class="row" style="gap:16px">
+      <div class="circle big ${c.kind === 'final' || c.kind === 'expected' ? 'man' : c.value === null ? 'none' : ''}">${c.value === null ? '–' : c.value}</div>
+      <div class="grow"><div class="small muted" style="font-weight:600">${esc(tr.halfyear)} ${term} · ${esc(c.kind === 'final' ? tr.final : c.kind === 'expected' ? tr.expected : tr.provisional)}</div>
+        ${est ? `<div class="small" style="margin-top:4px">${esc(tr.weightedAvg)} <strong class="num">${esc(fmt1(est.avg))}</strong> → ${esc(tr.rounded)} <strong>${est.points}</strong> <span class="muted tiny">${esc(tr.edupageRounding)}</span></div>` : `<div class="small muted" style="margin-top:4px">${esc(tr.noGradeYet)}</div>`}
+        ${c.value !== null ? `<div class="tiny" style="color:var(--good);font-weight:600;margin-top:4px">${esc(tr.worthAbi(fmt1(c.value * 10 / 9)))}</div>` : ''}
+      </div></div>
+      ${est && est.uncategorized ? `<div class="tiny muted">${esc(tr.uncategorizedNote)}</div>` : ''}
+      ${k === 'sk' ? `<div class="tiny muted">${esc(tr.skNote)}</div>` : ''}</div>`;
+  const termsRow = `<div class="seg">${TERMS.map(tt => `<button data-term="${tt}" class="${tt === term ? 'on' : ''}">${tt}</button>`).join('')}</div>`;
+  const examKeys = settings().exam.map(e => e.subject); const exIdx = examKeys.indexOf(k);
+  return `<div class="row" style="gap:6px"><a href="#faecher" class="iconbtn" aria-label="${esc(tr.back)}" style="display:grid;text-decoration:none;color:var(--fg)">${ICONS.back}</a>
+      <div class="grow"><h2 style="font-size:22px">${esc(sName(k))}</h2><div class="small muted">${exIdx >= 0 ? `${esc(tr.examSubject)} ${exIdx + 1} · ${esc(tr.mandatory4)}` : esc(tr.rules[k] || '')} · ${esc(tr.subjectAvg)} <strong class="num">${esc(fmt1(C.subjAvg[k]))}</strong></div></div></div>
+    ${termsRow}
+    <div class="two"><div class="stack" style="gap:14px">${summary}
+      <div class="card">${catHtml || `<div class="muted small">${esc(tr.noGradeYet)}</div>`}
+        <button class="btn ghost" data-add="${k}">${ICONS.plus} ${esc(tr.addGrade)}</button></div></div>
+    <div class="stack" style="gap:14px">${need}
+      <div class="card"><div class="row between"><div class="grow"><h3>${esc(tr.finalGrade)}</h3><div class="tiny muted">${esc(tr.finalHint)}</div></div>
+        <input class="pts" type="text" inputmode="numeric" id="final-${k}-${term}" data-final="${finKey}" value="${finVal}" placeholder="–" aria-label="${esc(tr.finalGrade)}"></div>
+        <div class="row between" style="padding-top:8px;border-top:1px solid var(--line)"><div class="grow"><h3>${esc(tr.expected)}</h3><div class="tiny muted">${esc(tr.expectedHint)}</div></div>
+        <input class="pts" type="text" inputmode="numeric" id="exp-${k}-${term}" data-expected="${finKey}" value="${expVal}" placeholder="–" aria-label="${esc(tr.expected)}"></div></div>
+      <div class="card"><h3>${esc(tr.terms4)}</h3><div class="grid4">${TERMS.map(tt => { const cc = C.cells[k + '|' + tt]; return `<button class="tile" data-term="${tt}" style="align-items:center;border:${tt === term ? '2px solid var(--accent)' : '2px solid transparent'};cursor:pointer">${badgeFor(cc)}<div class="tiny muted" style="font-weight:600">${tt}</div></button>`; }).join('')}</div></div>
+    </div></div>`;
+}
+
+function vEinbringung(C) {
+  const tr = t(); const st = settings(); const examKeys = st.exam.map(e => e.subject);
+  const picked = new Set(C.ein.error ? [] : C.ein.picked.map(p => p.subject + '|' + p.term));
+  const counts = C.ein.error ? {} : C.ein.counts;
+  const mustN = 22, spN = C.ein.error ? 0 : Math.min(3, counts.sp || 0);
+  const rows = R.SUBJECTS.map(s => {
+    const k = s.key; const isMust = k === 'de' || k === 'ma' || examKeys.includes(k);
+    const cells = TERMS.map(tt => {
+      const key = k + '|' + tt; const c = C.cells[key]; const fx = st.fixed[k] && st.fixed[k][tt];
+      const v = C.values[k] ? C.values[k][tt] : null;
+      const inSel = picked.has(key);
+      let cls, style;
+      if (v === null) { cls = 'off'; style = ''; }
+      else if (inSel && isMust) { cls = 'must'; style = ''; }
+      else if (inSel) { cls = 'man'; style = ''; }
+      else { cls = 'off'; style = ''; }
+      const ring = fx === true ? 'box-shadow:0 0 0 2px var(--accent)' : fx === false ? 'box-shadow:0 0 0 2px var(--bad)' : '';
+      const label = v === null ? '–' : (c.value === null ? `(${v})` : v);
+      return `<div><button class="cellbtn badge ${cls}" data-fix="${key}" style="${ring}" aria-label="${esc(sName(k))} ${tt}" title="${fx === true ? tr.legendFix : ''}">${label}</button></div>`;
+    }).join('');
+    return `<div class="trow"><a class="name" href="#faecher" data-subject="${k}"><span style="font-weight:600;font-size:13px">${esc(sName(k))}</span><span class="tiny muted">${esc(examKeys.includes(k) ? tr.rules.exam : tr.rules[k])} · ${counts[k] || 0}/4</span></a>${cells}<div style="border-radius:0 12px 12px 0"></div></div>`;
+  }).join('');
+  const checks = C.ein.error ? '' : C.ein.checks.map(c => checkRow(c.ok, tr.checks[c.id], String(c.value))).join('');
+  return `<div class="row between"><h2 style="font-size:22px">${esc(tr.nav.einbringung)}</h2><span class="small muted" style="font-weight:600">${esc(tr.einSummary)}</span></div>
+    <div class="two"><div class="stack" style="gap:14px">
+      <div class="card">
+        <div class="bar" style="height:14px"><span style="width:${mustN / 36 * 100}%;background:var(--dark-chip)"></span><span style="width:${spN / 36 * 100}%;background:var(--muted)"></span><span style="width:${(36 - mustN - spN) / 36 * 100}%;background:var(--accent)"></span></div>
+        <div class="grid3 small"><div><strong style="font-size:16px">${mustN}</strong><br><span class="muted">${esc(tr.must)}</span></div><div><strong style="font-size:16px">${spN}</strong><br><span class="muted">Sport</span></div><div><strong style="font-size:16px">${36 - mustN - spN}</strong><br><span class="muted">${esc(tr.freeSlots)}</span></div></div>
+        <div class="tiny muted">${esc(tr.autoHint)}</div>
+        ${C.assumedCount ? `<div class="tiny muted">${esc(tr.assumedCells(C.assumedCount))}</div>` : ''}
+        ${C.ein.error ? `<div class="small" style="color:var(--warn)">${esc(C.ein.error === 'no_data' ? tr.noData : tr.einNoSelection)}</div>` : `<div class="row" style="gap:14px"><div><div class="tiny muted" style="font-weight:600">Σ</div><div style="font-weight:700" class="num">${C.ein.sum}</div></div><div><div class="tiny muted" style="font-weight:600">E I</div><div style="font-weight:700" class="num">${C.ein.eI} / 600</div></div></div>`}
+      </div>
+      <div class="table"><div class="h l">${esc(tr.termHead)} · ${esc(tr.rule)}</div>${TERMS.map(tt => `<div class="h">${tt}</div>`).join('')}<div class="h"></div>${rows}</div>
+      <div class="legend"><span><i style="background:var(--dark-chip)"></i>${esc(tr.legendMust)}</span><span><i style="background:var(--accent-soft);border:1px solid var(--accent)"></i>${esc(tr.legendPick)}</span><span><i style="border:1px dashed var(--faint)"></i>${esc(tr.legendOff)}</span><span><i style="box-shadow:0 0 0 2px var(--accent);background:var(--surface)"></i>${esc(tr.legendFix)}</span></div>
+    </div>
+    <div class="card"><div class="stack">${checks}${tr.einRules.map(r => `<div class="check ok"><span style="width:16px;flex:none"></span><span class="muted">${esc(r)}</span></div>`).join('')}</div></div></div>`;
+}
+
+function vExams(C) {
+  const tr = t(); const st = settings();
+  const allowed = [['de'], ['ma', 'en'], ['ma', 'en', 'bi', 'ph', 'ge'], R.SUBJECTS.filter(s => !s.noExam).map(s => s.key), R.SUBJECTS.filter(s => !s.noExam).map(s => s.key)];
+  const fieldStyle = { I: 'background:#EDE7F6;color:#4A2C82', II: 'background:var(--warn-soft);color:var(--warn-ink)', III: 'background:var(--good-soft);color:var(--good-ink)' };
+  const slots = st.exam.map((e, i) => {
+    const row = C.e2.rows[i]; const sub = e.subject ? R.BY_KEY[e.subject] : null;
+    const opts = allowed[i].map(k => `<option value="${k}" ${e.subject === k ? 'selected' : ''}>${esc(sName(k))}</option>`).join('');
+    const assumed = row.assumed ? row.value : null;
+    return `<div class="card" style="gap:8px"><div class="row"><span class="badge must sm">${i + 1}</span>
+        <select data-exam-subject="${i}" aria-label="${esc(tr.examSubject)} ${i + 1}" style="flex:1 1 auto;min-width:0">${i === 0 ? '' : `<option value="">${esc(tr.choose)}</option>`}${opts}</select>
+        ${sub ? `<span class="chip" style="${fieldStyle[sub.field] || ''}">${esc(tr.fieldLabel)} ${sub.field || '–'}</span>` : ''}</div>
+      <div class="tiny muted">${i < 3 ? esc(tr.written) : i === 4 ? esc(tr.presentation) : esc(tr.oral)} · ${esc(tr.slotRule[i])}</div>
+      <div class="row"><label class="tiny muted" style="width:70px;flex:none" for="res-${i}">${esc(tr.result)}</label><input class="pts" id="res-${i}" type="text" inputmode="numeric" data-exam-result="${i}" value="${typeof e.result === 'number' ? e.result : ''}" placeholder="–" aria-label="${esc(tr.result)} ${i + 1}">
+        <span class="tiny muted grow">${typeof e.result === 'number' ? '' : esc(tr.resultHint)}</span>
+        ${row.value !== null ? `<span class="small num" style="font-weight:700">${row.value}${assumed !== null ? ` <span class="tiny muted">${esc(tr.expectedPts)}</span>` : ''} <span class="tiny muted">×4 = ${row.value * 4}</span></span>` : ''}</div>
+      ${st.eII.mode === 'manual' && typeof e.result !== 'number' && e.subject ? `<div class="row"><input type="range" min="0" max="15" value="${(st.eII.manual && st.eII.manual[e.subject]) ?? 10}" data-exam-slider="${e.subject}" aria-label="${esc(sName(e.subject))} ${esc(tr.expectedPts)}"></div>` : ''}
+    </div>`;
+  }).join('');
+  const errs = C.examValid.errors.map(id => `<div class="check no">${ICONS.no}<span>${esc(tr.examErr[id] || id)}</span></div>`).join('');
+  const checks = C.e2.checks.map(c => checkRow(c.ok, tr.checks[c.id], String(c.value))).join('');
+  return `<div class="row between"><h2 style="font-size:22px">${esc(tr.examTitle)}</h2><span class="small muted" style="font-weight:600">${esc(tr.examSub)}</span></div>
+    <div class="two"><div class="stack" style="gap:10px">${slots}</div>
+    <div class="stack" style="gap:14px">
+      <div class="card"><div class="small muted" style="font-weight:600">${esc(C.e2.rows.every(r => !r.assumed) ? tr.eIIEntered : tr.eIIAssumed)}</div><div style="font-size:30px;font-weight:700" class="num">${C.e2.eII} <span class="small muted" style="font-weight:500">/ 300</span></div>
+        <div class="eyebrow" style="margin-top:6px">${esc(tr.assumption)}</div>
+        <div class="seg">${[['avg', tr.assumeAvg], ['notan', tr.assumeNotan], ['manual', tr.assumeManual]].map(([m, l]) => `<button data-eii-mode="${m}" class="${st.eII.mode === m ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>
+        <div class="stack" style="margin-top:6px">${checks}${errs || checkRow(true, tr.checks.exam_ok)}${checkRow(C.examValid.fields.length === 3, tr.checks.fields, C.examValid.fields.join(' · '))}</div></div>
+      <div class="small muted">${esc(tr.examFoot)}</div></div></div>`;
+}
+
+function vSetup(compact) {
+  const tr = t();
+  return `<div class="card" style="border:2px solid var(--accent)"><h2>${esc(tr.setupTitle)}</h2>
+    ${compact ? `<div class="small" style="color:var(--warn)">${esc(tr.tokenBad)}</div>` : `<div class="small">${esc(tr.setupText)}</div>`}
+    <ol class="small" style="margin:0;padding-left:18px;line-height:1.6"><li>${esc(tr.setupStep1)} <a href="https://github.com/settings/tokens/new?scopes=gist&description=Abi-Stand" target="_blank" rel="noopener">github.com/settings/tokens/new</a></li><li>${esc(tr.setupStep2)}</li><li>${esc(tr.setupStep3)}</li></ol>
+    <div class="row"><input type="text" id="tokeninput" autocomplete="off" spellcheck="false" placeholder="ghp_…" aria-label="GitHub token" style="font-family:ui-monospace,monospace"><button class="btn primary" data-connect="1">${esc(tr.connect)}</button></div>
+    <div class="tiny muted">${esc(tr.tokenNote)}</div></div>`;
+}
+function vMore(C) {
+  const tr = t(); const g = S.docs.grades;
+  const gh = S.store && S.store.kind === 'gist';
+  const ghCard = gh || S.status === 'token' ? `<div class="card"><div class="row between"><div class="grow"><h3>GitHub</h3><div class="small muted">${esc(gh ? tr.ghConnected : tr.notConnected)}</div></div>${gh ? `<button class="btn sm" data-disconnect="1">${esc(tr.disconnect)}</button>` : ''}</div></div>` : '';
+  const rules = RULES_TEXT[S.lang].map(([h, p]) => `<details><summary>${esc(h)}</summary><p>${esc(p)}</p></details>`).join('');
+  return `<h2 style="font-size:22px">${esc(tr.more)}</h2>
+    <div class="two"><div class="stack" style="gap:14px">
+      <div class="card"><div class="row"><span class="circle" style="width:40px;height:40px;border-radius:12px"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg></span>
+          <div class="grow"><h3>${esc(tr.syncTitle)}</h3><div class="small muted">${g ? `${esc(tr.lastSync)} ${esc(fmtDateTime(g.syncedAt))} · ${esc(tr.gradesRead(g.grades.length))}` : esc(tr.neverSynced)}</div></div></div>
+        <div class="small">${esc(tr.syncHow)}</div>
+        ${S.status === 'offline' ? `<div class="small" style="color:var(--warn)">${esc(tr.offline)}</div>` : ''}</div>
+      <div class="card"><h3>${esc(tr.devices)}</h3><div class="small muted">${esc(gh ? tr.devicesTextGh : tr.devicesText)}</div></div>
+      ${ghCard}
+      <div class="card"><div class="row between"><h3>${esc(tr.language)}</h3><div class="seg" style="width:160px"><button data-lang="de" class="${S.lang === 'de' ? 'on' : ''}">Deutsch</button><button data-lang="en" class="${S.lang === 'en' ? 'on' : ''}">English</button></div></div>
+        <div class="row between" style="padding-top:10px;border-top:1px solid var(--line)"><h3>${esc(tr.theme)}</h3><div class="seg" style="width:220px">${[['system', tr.themeSystem], ['light', tr.themeLight], ['dark', tr.themeDark]].map(([m, l]) => `<button data-mode="${m}" class="${S.mode === m ? 'on' : ''}">${esc(l)}</button>`).join('')}</div></div></div>
+      <div class="card"><h3>${esc(tr.export)}</h3><div class="row" style="flex-wrap:wrap"><button class="btn" data-export="pdf">${esc(tr.exportPdf)}</button><button class="btn" data-export="json">${esc(tr.exportJson)}</button></div><div class="tiny muted">${esc(tr.exportHint)}</div></div>
+    </div>
+    <div class="card"><h3>${esc(tr.rulesTitle)}</h3><div>${rules}</div><div class="tiny muted" style="margin-top:6px">${esc(tr.about)}</div></div></div>`;
+}
+
+/* ---------- edit sheet ---------- */
+function openSheet(id, addSubject) {
+  const tr = t(); const C = compute();
+  const g = id ? C.grades.find(x => x.id === id) : null;
+  const subject = g ? g.subject : addSubject; const term = g ? g.term : (S.term || '11.I');
+  const catNames = [...new Set(C.grades.filter(x => x.subject === subject && x.term === term && x.category).map(x => x.category + '|' + (x.catWeight || '')))];
+  const isManual = g ? g.isManual : true;
+  const root = document.getElementById('sheetroot');
+  root.innerHTML = `<div class="sheet-bg" data-close="1"><form class="sheet" id="sheetform" data-id="${esc(id || '')}" data-subject="${esc(subject)}">
+    <div class="row between"><h2>${esc(g ? tr.editGrade : tr.newGrade)} · ${esc(sName(subject))}</h2><button type="button" class="iconbtn" data-close="1" aria-label="${esc(tr.cancel)}">${ICONS.no}</button></div>
+    ${g && !isManual ? `<div class="small muted">${esc(tr.sourceEdu)}: ${esc(g.event)} · ${esc(tr.origValue)} <strong>${esc(g.origValue)}</strong>${g.category ? ` · ${esc(g.category)} ${g.catWeight || ''} %` : ''} · ${esc(tr.weight)} ${g.evWeight ?? '–'}<br>${esc(tr.editNote)}</div>` : ''}
+    ${isManual ? `<div class="field"><label for="f-event">${esc(tr.event)}</label><input id="f-event" type="text" name="event" value="${esc(g ? g.event : '')}" placeholder="z. B. Klausur Nr. 2"></div>
+      <div class="grid2"><div class="field"><label for="f-term">${esc(tr.term)}</label><select id="f-term" name="term">${TERMS.map(tt => `<option ${tt === term ? 'selected' : ''}>${tt}</option>`).join('')}</select></div>
+      <div class="field"><label for="f-cat">${esc(tr.category)}</label><select id="f-cat" name="category"><option value="">${esc(tr.none)}</option>${catNames.map(cn => `<option value="${esc(cn)}" ${g && g.category && cn.startsWith(g.category + '|') ? 'selected' : ''}>${esc(cn.split('|')[0])}${cn.split('|')[1] ? ' · ' + cn.split('|')[1] + ' %' : ''}</option>`).join('')}</select></div></div>` : ''}
+    <div class="grid2"><div class="field"><label for="f-value">${esc(tr.value)}</label><input id="f-value" type="text" inputmode="decimal" name="value" value="${esc(g ? g.value : '')}" required></div>
+      <div class="field"><label for="f-scale">${esc(tr.scale)}</label><select id="f-scale" name="scale">${[['p15', tr.scaleP15], ['g6', tr.scaleG6], ['ignore', tr.scaleIgnore]].map(([v, l]) => `<option value="${v}" ${(g ? (g.ignored ? 'ignore' : g.scale) : 'p15') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div></div>
+    <div class="field"><label for="f-note">${esc(tr.note)}</label><input id="f-note" type="text" name="note" value="${esc(g ? g.note || '' : '')}"></div>
+    <div class="row" style="justify-content:flex-end;flex-wrap:wrap">${g ? `<button type="button" class="btn" data-del="${esc(g.id)}" style="color:var(--bad)">${esc(isManual ? tr.delete : tr.reset)}</button>` : ''}<button type="button" class="btn" data-close="1">${esc(tr.cancel)}</button><button type="submit" class="btn primary">${esc(tr.save)}</button></div>
+  </form></div>`;
+  root.querySelector('#f-value').focus();
+}
+function closeSheet() { document.getElementById('sheetroot').innerHTML = ''; }
+function saveSheet(form) {
+  const id = form.dataset.id; const subject = form.dataset.subject; const fd = new FormData(form);
+  const value = String(fd.get('value') || '').trim(); const scale = fd.get('scale'); const note = String(fd.get('note') || '').trim();
+  const C = compute(); const g = id ? C.grades.find(x => x.id === id) : null;
+  if (g && !g.isManual) {
+    const e = Object.assign({}, edits());
+    e[id] = { value: value !== g.origValue ? value : null, scale: scale === 'ignore' ? null : (scale !== (g.scale === 'ignore' ? 'p15' : (S.docs.grades.grades.find(x => x.id === id) || {}).scale || 'p15') ? scale : null), ignore: scale === 'ignore', note };
+    if (!e[id].value && !e[id].scale && !e[id].ignore && !note) delete e[id];
+    writeDoc('edits', { edits: e });
+  } else {
+    const list = manual().slice();
+    const cat = String(fd.get('category') || ''); const [catName, catW] = cat ? cat.split('|') : ['', ''];
+    const row = { id: g ? g.id : 'm' + Date.now(), subject, term: String(fd.get('term') || (g ? g.term : '11.I')), event: String(fd.get('event') || '').trim(), category: catName || null, catWeight: catW ? Number(catW) : null, evWeight: 20, value, scale: scale === 'ignore' ? 'p15' : scale, ignore: scale === 'ignore', note, date: g ? g.date : new Date().toISOString().slice(0, 10), source: 'manual' };
+    const idx = list.findIndex(x => x.id === row.id); if (idx >= 0) list[idx] = row; else list.push(row);
+    writeDoc('manual', { grades: list });
+  }
+  closeSheet();
+}
+function deleteGrade(id) {
+  const C = compute(); const g = C.grades.find(x => x.id === id); if (!g) return;
+  if (g.isManual) writeDoc('manual', { grades: manual().filter(x => x.id !== id) });
+  else { const e = Object.assign({}, edits()); delete e[id]; writeDoc('edits', { edits: e }); }
+  closeSheet();
+}
+
+/* ---------- exports ---------- */
+async function exportJson() {
+  const data = { exportedAt: new Date().toISOString(), docs: S.docs };
+  await saveFile('abi-stand-backup.json', JSON.stringify(data, null, 1));
+}
+async function exportPdf() {
+  if (!window.jspdf) { toast('PDF n/a'); return; }
+  const tr = t(); const C = compute();
+  const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+  const line = (y, txt, size, bold) => { doc.setFontSize(size || 11); doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.text(String(txt), 20, y); };
+  line(20, tr.pdfTitle, 18, true); line(27, `${tr.pdfDate} ${fmtDate(new Date().toISOString())}`, 10);
+  let y = 40; line(y, `${tr.pdfSubject}`, 10, true); TERMS.forEach((tt, i) => { doc.text(tt, 90 + i * 20, y); }); doc.text('Ø', 175, y); y += 7;
+  doc.setFont('helvetica', 'normal');
+  for (const s of R.SUBJECTS) { doc.text(sName(s.key), 20, y); TERMS.forEach((tt, i) => { const c = C.cells[s.key + '|' + tt]; doc.text(c.value === null ? '–' : String(c.value) + (c.kind === 'est' ? '*' : ''), 90 + i * 20, y); }); doc.text(fmt1(C.subjAvg[s.key]), 175, y); y += 7; }
+  y += 4; doc.setFontSize(9); doc.text('* ' + tr.provisional, 20, y); y += 10;
+  line(y, `E I: ${C.ein.error ? '–' : C.ein.eI} / 600   E II: ${C.e2.eII} / 300   ${tr.pdfTotal}: ${C.tot ? C.tot.E : '–'} / 900`, 11, true); y += 8;
+  line(y, `${tr.pdfProg} ${tr.pdfGrade}: ${C.tot ? fmtG(C.tot.grade) : '–'}`, 14, true); y += 10;
+  doc.setFontSize(8); doc.text(tr.about, 20, y, { maxWidth: 170 });
+  await saveFile('abi-stand.pdf', doc.output('arraybuffer'));
+}
+
+/* ---------- events ---------- */
+function setView(v, subject) {
+  if (v === 'faecher' && subject) { S.view = 'fach'; S.subject = subject; S.term = null; }
+  else { S.view = T.de.nav[v] ? v : 'uebersicht'; }
+  render();
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-nav]'); if (a) { e.preventDefault(); setView(a.dataset.nav); history.replaceState(null, '', '#' + a.dataset.nav); return; }
+  const sub = e.target.closest('[data-subject]'); if (sub) { e.preventDefault(); setView('faecher', sub.dataset.subject); return; }
+  const term = e.target.closest('[data-term]'); if (term) { S.term = term.dataset.term; render(); return; }
+  const ed = e.target.closest('[data-edit]'); if (ed) { openSheet(ed.dataset.edit); return; }
+  const add = e.target.closest('[data-add]'); if (add) { openSheet(null, add.dataset.add); return; }
+  const del = e.target.closest('[data-del]'); if (del) { deleteGrade(del.dataset.del); return; }
+  if (e.target.classList.contains('sheet-bg') || e.target.closest('button[data-close]')) { closeSheet(); return; }
+  const fix = e.target.closest('[data-fix]'); if (fix) { const [k, tt] = fix.dataset.fix.split('|'); const st = settings(); const fixed = JSON.parse(JSON.stringify(st.fixed || {})); fixed[k] = fixed[k] || {}; const cur = fixed[k][tt]; if (cur === undefined) fixed[k][tt] = true; else if (cur === true) fixed[k][tt] = false; else delete fixed[k][tt]; if (!Object.keys(fixed[k]).length) delete fixed[k]; writeDoc('settings', Object.assign({}, st, { fixed })); return; }
+  const mode = e.target.closest('[data-eii-mode]'); if (mode) { const st = settings(); writeDoc('settings', Object.assign({}, st, { eII: Object.assign({}, st.eII, { mode: mode.dataset.eiiMode }) })); return; }
+  const lang = e.target.closest('[data-lang]'); if (lang) { S.lang = lang.dataset.lang; lsSet('abi.lang', S.lang); render(); return; }
+  const th = e.target.closest('[data-mode]'); if (th) { S.mode = th.dataset.mode; lsSet('abi.mode', S.mode); applyMode(); render(); return; }
+  const ex = e.target.closest('[data-export]'); if (ex) { ex.dataset.export === 'pdf' ? exportPdf() : exportJson(); return; }
+  if (e.target.closest('[data-connect]')) { const inp = document.getElementById('tokeninput'); connectGist(inp && inp.value); return; }
+  if (e.target.closest('[data-disconnect]')) { disconnectGist(); return; }
+  if (e.target.closest('#langbtn')) { S.lang = S.lang === 'de' ? 'en' : 'de'; lsSet('abi.lang', S.lang); render(); return; }
+  if (e.target.closest('#themebtn')) { S.mode = S.mode === 'dark' ? 'light' : S.mode === 'light' ? 'system' : 'dark'; lsSet('abi.mode', S.mode); applyMode(); render(); return; }
+});
+document.addEventListener('submit', e => { if (e.target.id === 'sheetform') { e.preventDefault(); saveSheet(e.target); } });
+document.addEventListener('change', e => {
+  const el = e.target;
+  const parsePts = v => { const s = String(v).trim().replace(',', '.'); if (s === '') return null; const n = Number(s); return (isFinite(n) && n >= 0 && n <= 15) ? Math.round(n) : undefined; };
+  if (el.dataset.final !== undefined || el.dataset.expected !== undefined) {
+    const which = el.dataset.final !== undefined ? 'final' : 'expected'; const key = el.dataset[which];
+    const n = parsePts(el.value); if (n === undefined) { el.value = ''; return; }
+    const tm = JSON.parse(JSON.stringify(terms())); if (n === null) delete tm[which][key]; else tm[which][key] = n; writeDoc('terms', tm); return;
+  }
+  if (el.dataset.examSubject !== undefined) { const st = settings(); const exam = JSON.parse(JSON.stringify(st.exam)); exam[+el.dataset.examSubject].subject = el.value || null; writeDoc('settings', Object.assign({}, st, { exam })); return; }
+  if (el.dataset.examResult !== undefined) { const n = parsePts(el.value); if (n === undefined) { el.value = ''; return; } const st = settings(); const exam = JSON.parse(JSON.stringify(st.exam)); exam[+el.dataset.examResult].result = n; writeDoc('settings', Object.assign({}, st, { exam })); return; }
+  if (el.dataset.examSlider !== undefined) { const st = settings(); const manualV = Object.assign({}, st.eII.manual || {}); manualV[el.dataset.examSlider] = Number(el.value); writeDoc('settings', Object.assign({}, st, { eII: Object.assign({}, st.eII, { manual: manualV }) })); return; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.sheet')) closeSheet(); });
+window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (T.de.nav[h]) setView(h); });
+
+function applyMode() { const root = document.documentElement; if (S.mode === 'system') root.removeAttribute('data-mode'); else root.setAttribute('data-mode', S.mode); }
+
+/* ---------- boot ---------- */
+function startStore(store) {
+  S.store = store; S.status = 'loading'; render();
+  const timer = setTimeout(() => { if (S.status === 'loading') { S.status = 'offline'; render(); } }, 10000);
+  store.subscribe((n, data) => { S.docs[n] = data; lsSet('abi.' + n, data); if (!document.querySelector('.sheet')) render(); },
+    err => { console.error(err); if (err && err.code === 'token') { S.status = 'token'; } else S.status = 'offline'; clearTimeout(timer); render(); },
+    () => { clearTimeout(timer); S.status = 'ready'; render(); });
+}
+function connectGist(token) {
+  token = String(token || '').trim();
+  if (!token) return;
+  lsSet('abi.token', token); lsSet('abi.gistId', null);
+  startStore(gistStore(token));
+}
+function disconnectGist() { lsSet('abi.token', null); lsSet('abi.gistId', null); location.reload(); }
+async function boot() {
+  S.lang = lsGet('abi.lang') || ((navigator.language || '').startsWith('en') ? 'en' : 'de');
+  S.mode = lsGet('abi.mode') || 'system'; applyMode();
+  for (const n of Object.keys(S.docs)) S.docs[n] = lsGet('abi.' + n);
+  const h = location.hash.replace('#', ''); if (T.de.nav[h]) S.view = h;
+  render();
+  if (window.claude && window.claude.use) {
+    const [db, dl] = await Promise.all([window.claude.use('db'), window.claude.use('downloads')]);
+    S.downloads = dl;
+    if (db) { startStore(claudeStore(db)); return; }
+  }
+  const token = lsGet('abi.token');
+  if (token) startStore(gistStore(token));
+  else { S.status = 'token'; render(); }
+}
+boot();
+})();
+</script>
+
+</body>
+</html>
