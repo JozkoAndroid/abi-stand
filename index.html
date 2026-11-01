@@ -558,7 +558,7 @@ function vOverview(C) {
       ${flagHtml}</div>
     <div class="stack" style="gap:14px">
       <div class="card"><div class="stack">${checks.join('')}</div></div>
-      <div class="card"><div class="row between"><h2>${esc(tr.newGrades)}</h2><a href="#faecher" class="small" style="font-weight:600;text-decoration:none">${esc(tr.allSubjects)}</a></div><div class="list">${recentHtml}</div></div>
+      <div class="card"><div class="row between"><h2>${esc(tr.newGrades)}</h2><a href="#faecher" data-nav="faecher" class="small" style="font-weight:600;text-decoration:none">${esc(tr.allSubjects)}</a></div><div class="list">${recentHtml}</div></div>
     </div></div>`;
 }
 
@@ -614,7 +614,7 @@ function vSubject(C) {
       ${k === 'sk' ? `<div class="tiny muted">${esc(tr.skNote)}</div>` : ''}</div>`;
   const termsRow = `<div class="seg">${TERMS.map(tt => `<button data-term="${tt}" class="${tt === term ? 'on' : ''}">${tt}</button>`).join('')}</div>`;
   const examKeys = settings().exam.map(e => e.subject); const exIdx = examKeys.indexOf(k);
-  return `<div class="row" style="gap:6px"><a href="#faecher" class="iconbtn" aria-label="${esc(tr.back)}" style="display:grid;text-decoration:none;color:var(--fg)">${ICONS.back}</a>
+  return `<div class="row" style="gap:6px"><a href="#faecher" data-nav="faecher" class="iconbtn" aria-label="${esc(tr.back)}" style="display:grid;text-decoration:none;color:var(--fg)">${ICONS.back}</a>
       <div class="grow"><h2 style="font-size:22px">${esc(sName(k))}</h2><div class="small muted">${exIdx >= 0 ? `${esc(tr.examSubject)} ${exIdx + 1} · ${esc(tr.mandatory4)}` : esc(tr.rules[k] || '')} · ${esc(tr.subjectAvg)} <strong class="num">${esc(fmt1(C.subjAvg[k]))}</strong></div></div></div>
     ${termsRow}
     <div class="two"><div class="stack" style="gap:14px">${summary}
