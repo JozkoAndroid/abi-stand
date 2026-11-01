@@ -714,7 +714,7 @@ function vMore(C) {
       <div class="card"><h3>${esc(tr.devices)}</h3><div class="small muted">${esc(gh ? tr.devicesTextGh : tr.devicesText)}</div></div>
       ${ghCard}
       <div class="card"><div class="row between"><h3>${esc(tr.language)}</h3><div class="seg" style="width:160px"><button data-lang="de" class="${S.lang === 'de' ? 'on' : ''}">Deutsch</button><button data-lang="en" class="${S.lang === 'en' ? 'on' : ''}">English</button></div></div>
-        <div class="row between" style="padding-top:10px;border-top:1px solid var(--line)"><h3>${esc(tr.theme)}</h3><div class="seg" style="width:220px">${[['system', tr.themeSystem], ['light', tr.themeLight], ['dark', tr.themeDark]].map(([m, l]) => `<button data-mode="${m}" class="${S.mode === m ? 'on' : ''}">${esc(l)}</button>`).join('')}</div></div></div>
+        <div class="row between" style="padding-top:10px;border-top:1px solid var(--line)"><h3>${esc(tr.theme)}</h3><div class="seg" style="width:220px">${[['system', tr.themeSystem], ['light', tr.themeLight], ['dark', tr.themeDark]].map(([m, l]) => `<button data-set-mode="${m}" class="${S.mode === m ? 'on' : ''}">${esc(l)}</button>`).join('')}</div></div></div>
       <div class="card"><h3>${esc(tr.export)}</h3><div class="row" style="flex-wrap:wrap"><button class="btn" data-export="pdf">${esc(tr.exportPdf)}</button><button class="btn" data-export="json">${esc(tr.exportJson)}</button></div><div class="tiny muted">${esc(tr.exportHint)}</div></div>
     </div>
     <div class="card"><h3>${esc(tr.rulesTitle)}</h3><div>${rules}</div><div class="tiny muted" style="margin-top:6px">${esc(tr.about)}</div></div></div>`;
@@ -795,17 +795,22 @@ function setView(v, subject) {
   render();
 }
 document.addEventListener('click', e => {
+  // clicks inside the edit pop-up: only its own buttons count
+  if (e.target.closest('.sheet')) {
+    const del = e.target.closest('[data-del]'); if (del) { deleteGrade(del.dataset.del); return; }
+    if (e.target.closest('button[data-close]')) closeSheet();
+    return;
+  }
+  if (e.target.classList.contains('sheet-bg')) { closeSheet(); return; }
   const a = e.target.closest('[data-nav]'); if (a) { e.preventDefault(); setView(a.dataset.nav); history.replaceState(null, '', '#' + a.dataset.nav); return; }
   const sub = e.target.closest('[data-subject]'); if (sub) { e.preventDefault(); setView('faecher', sub.dataset.subject); return; }
   const term = e.target.closest('[data-term]'); if (term) { S.term = term.dataset.term; render(); return; }
   const ed = e.target.closest('[data-edit]'); if (ed) { openSheet(ed.dataset.edit); return; }
   const add = e.target.closest('[data-add]'); if (add) { openSheet(null, add.dataset.add); return; }
-  const del = e.target.closest('[data-del]'); if (del) { deleteGrade(del.dataset.del); return; }
-  if (e.target.classList.contains('sheet-bg') || e.target.closest('button[data-close]')) { closeSheet(); return; }
   const fix = e.target.closest('[data-fix]'); if (fix) { const [k, tt] = fix.dataset.fix.split('|'); const st = settings(); const fixed = JSON.parse(JSON.stringify(st.fixed || {})); fixed[k] = fixed[k] || {}; const cur = fixed[k][tt]; if (cur === undefined) fixed[k][tt] = true; else if (cur === true) fixed[k][tt] = false; else delete fixed[k][tt]; if (!Object.keys(fixed[k]).length) delete fixed[k]; writeDoc('settings', Object.assign({}, st, { fixed })); return; }
   const mode = e.target.closest('[data-eii-mode]'); if (mode) { const st = settings(); writeDoc('settings', Object.assign({}, st, { eII: Object.assign({}, st.eII, { mode: mode.dataset.eiiMode }) })); return; }
   const lang = e.target.closest('[data-lang]'); if (lang) { S.lang = lang.dataset.lang; lsSet('abi.lang', S.lang); render(); return; }
-  const th = e.target.closest('[data-mode]'); if (th) { S.mode = th.dataset.mode; lsSet('abi.mode', S.mode); applyMode(); render(); return; }
+  const th = e.target.closest('[data-set-mode]'); if (th) { S.mode = th.dataset.setMode; lsSet('abi.mode', S.mode); applyMode(); render(); return; }
   const ex = e.target.closest('[data-export]'); if (ex) { ex.dataset.export === 'pdf' ? exportPdf() : exportJson(); return; }
   if (e.target.closest('[data-connect]')) { const inp = document.getElementById('tokeninput'); connectGist(inp && inp.value); return; }
   if (e.target.closest('[data-disconnect]')) { disconnectGist(); return; }
@@ -825,7 +830,10 @@ document.addEventListener('change', e => {
   if (el.dataset.examResult !== undefined) { const n = parsePts(el.value); if (n === undefined) { el.value = ''; return; } const st = settings(); const exam = JSON.parse(JSON.stringify(st.exam)); exam[+el.dataset.examResult].result = n; writeDoc('settings', Object.assign({}, st, { exam })); return; }
   if (el.dataset.examSlider !== undefined) { const st = settings(); const manualV = Object.assign({}, st.eII.manual || {}); manualV[el.dataset.examSlider] = Number(el.value); writeDoc('settings', Object.assign({}, st, { eII: Object.assign({}, st.eII, { manual: manualV }) })); return; }
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.sheet')) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.querySelector('.sheet')) closeSheet();
+  if (e.key === 'Enter' && e.target && e.target.id === 'tokeninput') { e.preventDefault(); connectGist(e.target.value); }
+});
 window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (T.de.nav[h]) setView(h); });
 
 function applyMode() { const root = document.documentElement; if (S.mode === 'system') root.removeAttribute('data-mode'); else root.setAttribute('data-mode', S.mode); }
