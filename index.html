@@ -418,11 +418,14 @@ function effectiveGrades() {
   const ed = edits();
   const imported = ((S.docs.grades && S.docs.grades.grades) || []).map(g => {
     const e = ed[g.id] || {};
-    const scale = e.scale || g.scale || 'p15';
+    let scale = e.scale || g.scale || 'p15';
     const value = e.value !== undefined && e.value !== null && e.value !== '' ? e.value : g.value;
+    // an "old 1-6 scale" edit no longer fits once EduPage shows a real point value (7-15): drop it
+    if (scale === 'g6' && !e.value && R.pointsOf(value, 'g6') === null && R.pointsOf(value, 'p15') !== null) scale = 'p15';
     const ignored = !!e.ignore || scale === 'ignore';
     const points = ignored ? null : R.pointsOf(value, scale);
-    return Object.assign({}, g, { value, scale, ignored, points, edited: !!(e.value || e.scale || e.ignore), note: e.note || '', origValue: g.value, flag: e.value || e.scale || e.ignore ? null : g.flag });
+    const flag = (e.value || e.scale || e.ignore) ? null : (g.flag === 'check' && R.pointsOf(g.value, 'p15') !== null && Number(g.value) > 6 ? null : g.flag);
+    return Object.assign({}, g, { value, scale, ignored, points, edited: !!(e.value || e.scale || e.ignore), note: e.note || '', origValue: g.value, flag });
   });
   const man = manual().map(g => Object.assign({}, g, { points: g.ignore ? null : R.pointsOf(g.value, g.scale || 'p15'), ignored: !!g.ignore, isManual: true, source: 'manual' }));
   return imported.concat(man);
